@@ -1,8 +1,9 @@
+package com.beeva.trustedoverlord;
+
 import com.amazonaws.services.support.model.AWSSupportException;
-import com.amazonaws.util.StringUtils;
-import model.ProfileChecks;
-import service.TrustedOverlordService;
-import service.impl.TrustedOverlordServiceImpl;
+import com.beeva.trustedoverlord.model.ProfileChecks;
+import com.beeva.trustedoverlord.service.TrustedOverlordService;
+import com.beeva.trustedoverlord.service.impl.TrustedOverlordServiceImpl;
 
 /**
  * Created by cesarsilgo on 1/02/17.

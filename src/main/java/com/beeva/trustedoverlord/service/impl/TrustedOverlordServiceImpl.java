@@ -1,11 +1,11 @@
-package service.impl;
+package com.beeva.trustedoverlord.service.impl;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.support.AWSSupport;
 import com.amazonaws.services.support.AWSSupportClientBuilder;
 import com.amazonaws.services.support.model.*;
-import model.ProfileChecks;
-import service.TrustedOverlordService;
+import com.beeva.trustedoverlord.model.ProfileChecks;
+import com.beeva.trustedoverlord.service.TrustedOverlordService;
 
 import java.util.HashMap;
 import java.util.Map;

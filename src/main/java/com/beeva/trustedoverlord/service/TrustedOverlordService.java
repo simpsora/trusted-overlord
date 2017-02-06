@@ -1,6 +1,6 @@
-package service;
+package com.beeva.trustedoverlord.service;
 
-import model.ProfileChecks;
+import com.beeva.trustedoverlord.model.ProfileChecks;
 
 /**
  * Created by cesarsilgo on 31/01/17.
