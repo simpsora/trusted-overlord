@@ -59,7 +59,7 @@ Checking Trusted Advisor for profile profileName1
  + Warning: Amazon S3 Bucket Versioning
 
 =====================================================================
-Checking Trusted Advisor for profile profileName1
+Checking Trusted Advisor for profile profileName2
 =====================================================================
 ...
 
