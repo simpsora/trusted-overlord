@@ -30,7 +30,7 @@ public class TrustedOverlord {
         banner.info("  \\_/_|   \\__,_|___/\\__\\___|\\__,_|  \\___/  \\_/ \\___|_|  |_|\\___/ \\__,_|");
         banner.info("");
 
-        logger.info("");
+        banner.info("");
         logger.info("...will now check {} AWS accounts. ", args.length);
 
         for(String profile : args) {
@@ -56,17 +56,17 @@ public class TrustedOverlord {
                 totalNumWarnings += profileChecks.getWarnings().size();
 
             } catch (AWSSupportException ex) {
-                logger.fatal("UNAUTHORIZED");
+                logger.error("UNAUTHORIZED");
             }
 
         }
 
-        logger.info("");
-        logger.info("");
-        logger.info("**************************************************************************");
-        logger.info("TOTAL ERRORS: {}", totalNumErrors);
-        logger.info("TOTAL WARNINGS: {}", totalNumWarnings);
-        logger.info("**************************************************************************");
+        banner.info("");
+        banner.info("");
+        banner.info("**************************************************************************");
+        banner.info("TOTAL ERRORS: {}", totalNumErrors);
+        banner.info("TOTAL WARNINGS: {}", totalNumWarnings);
+        banner.info("**************************************************************************");
 
 
     }
