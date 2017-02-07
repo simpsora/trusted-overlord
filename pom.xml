@@ -28,6 +28,7 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- AWS Modules -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-support</artifactId>
@@ -36,6 +37,8 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-health</artifactId>
         </dependency>
+
+        <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
