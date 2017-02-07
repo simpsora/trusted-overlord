@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by cesarsilgo on 1/02/17.
+ * Lists of errors and warnings
  */
 public class ProfileChecks {
 
-    private String profile;
     private List<String> errors;
     private List<String> warnings;
 
-    public ProfileChecks(String profile) {
-        this.profile = profile;
+    public ProfileChecks() {
         this.errors = new ArrayList<>();
         this.warnings = new ArrayList<>();
     }
