@@ -26,7 +26,7 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
 
     public ProfileChecks getProfileChecks(final String profile) {
 
-        ProfileChecks result = new ProfileChecks(profile);
+        ProfileChecks result = new ProfileChecks();
 
         DescribeTrustedAdvisorChecksResult describeServicesResult = awsSupportMap.get(profile)
                 .describeTrustedAdvisorChecks(new DescribeTrustedAdvisorChecksRequest().withLanguage("en"));
