@@ -4,11 +4,15 @@ import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.service.TrustedOverlordService;
 import com.beeva.trustedoverlord.service.impl.TrustedOverlordServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by cesarsilgo on 1/02/17.
  */
 public class TrustedOverlord {
+
+    private static Logger logger = LogManager.getLogger(TrustedOverlord.class);
 
     public static void main(String args[]) {
 
@@ -17,45 +21,47 @@ public class TrustedOverlord {
         int totalNumWarnings = 0;
         int totalNumErrors = 0;
 
-        System.out.println(" _____              _           _   _____                _           _");
-        System.out.println("|_   _|            | |         | | |  _  |              | |         | |");
-        System.out.println("  | |_ __ _   _ ___| |_ ___  __| | | | | |_   _____ _ __| | ___   __| |");
-        System.out.println("  | | '__| | | / __| __/ _ \\/ _` | | | | \\ \\ / / _ \\ '__| |/ _ \\ / _` |");
-        System.out.println("  | | |  | |_| \\__ \\ ||  __/ (_| | \\ \\_/ /\\ V /  __/ |  | | (_) | (_| |");
-        System.out.println("  \\_/_|   \\__,_|___/\\__\\___|\\__,_|  \\___/  \\_/ \\___|_|  |_|\\___/ \\__,_|");
+        logger.info(" _____              _           _   _____                _           _");
+        logger.info("|_   _|            | |         | | |  _  |              | |         | |");
+        logger.info("  | |_ __ _   _ ___| |_ ___  __| | | | | |_   _____ _ __| | ___   __| |");
+        logger.info("  | | '__| | | / __| __/ _ \\/ _` | | | | \\ \\ / / _ \\ '__| |/ _ \\ / _` |");
+        logger.info("  | | |  | |_| \\__ \\ ||  __/ (_| | \\ \\_/ /\\ V /  __/ |  | | (_) | (_| |");
+        logger.info("  \\_/_|   \\__,_|___/\\__\\___|\\__,_|  \\___/  \\_/ \\___|_|  |_|\\___/ \\__,_|");
 
-        System.out.println("\n...will now check " + args.length + " AWS accounts. ");
+        logger.info("\n");
+        logger.info("...will now check " + args.length + " AWS accounts. ");
 
         for(String profile : args) {
 
-            System.out.println("\n=====================================================================");
-            System.out.println("Checking Trusted Advisor for profile " + profile);
-            System.out.println("=====================================================================\n");
+            logger.info("=====================================================================");
+            logger.info("Checking Trusted Advisor for profile " + profile);
+            logger.info("=====================================================================");
             try {
                 ProfileChecks profileChecks = trustedOverlordService.getProfileChecks(profile);
-                System.out.println(" # Errors: " + profileChecks.getErrors().size());
-                System.out.println(" # Warnings: " + profileChecks.getWarnings().size());
+                logger.info(" # Errors: " + profileChecks.getErrors().size());
+                logger.info(" # Warnings: " + profileChecks.getWarnings().size());
 
-                System.out.println("");
+                logger.info("");
                 for(String error : profileChecks.getErrors()) {
-                    System.out.println(" + Error: " + error);
+                    logger.error(" + Error: " + error);
                 }
                 totalNumErrors += profileChecks.getErrors().size();
 
                 for(String error : profileChecks.getWarnings()) {
-                    System.out.println(" + Warning: " + error);
+                    logger.warn(" + Warning: " + error);
                 }
                 totalNumWarnings += profileChecks.getWarnings().size();
 
             } catch (AWSSupportException ex) {
-                System.out.println("UNATHORIZED\n");
+                logger.fatal("UNAUTHORIZED");
             }
 
         }
 
-        System.out.println("\n\n**************************************************************************");
-        System.out.println("TOTAL ERRORS: "+totalNumErrors);
-        System.out.println("TOTAL WARNINGS: "+totalNumWarnings);
+        logger.info("\n\n");
+        logger.info("**************************************************************************");
+        logger.info("TOTAL ERRORS: "+totalNumErrors);
+        logger.info("TOTAL WARNINGS: "+totalNumWarnings);
 
 
     }
