@@ -5,7 +5,7 @@
 			<PatternLayout pattern="%d{ISO8601} %highlight{%-5level}{INFO=normal} [%t] %logger{1.}: %msg%n%throwable"/>
 		</Console>
         <Console name="Banners" target="SYSTEM_OUT">
-            <PatternLayout pattern="%msg%n%throwable"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %msg%n%throwable"/>
         </Console>
 		<Async name="AsyncBanners">
 			<AppenderRef ref="Banners"/>
