@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 public class TrustedOverlord {
 
     private static Logger logger = LogManager.getLogger(TrustedOverlord.class);
+    private static Logger banner = LogManager.getLogger("com.beeva.trustedoverlord.Banner");
 
     public static void main(String args[]) {
 
@@ -21,22 +22,23 @@ public class TrustedOverlord {
         int totalNumWarnings = 0;
         int totalNumErrors = 0;
 
-        logger.info(" _____              _           _   _____                _           _");
-        logger.info("|_   _|            | |         | | |  _  |              | |         | |");
-        logger.info("  | |_ __ _   _ ___| |_ ___  __| | | | | |_   _____ _ __| | ___   __| |");
-        logger.info("  | | '__| | | / __| __/ _ \\/ _` | | | | \\ \\ / / _ \\ '__| |/ _ \\ / _` |");
-        logger.info("  | | |  | |_| \\__ \\ ||  __/ (_| | \\ \\_/ /\\ V /  __/ |  | | (_) | (_| |");
-        logger.info("  \\_/_|   \\__,_|___/\\__\\___|\\__,_|  \\___/  \\_/ \\___|_|  |_|\\___/ \\__,_|");
+        banner.info(" _____              _           _   _____                _           _");
+        banner.info("|_   _|            | |         | | |  _  |              | |         | |");
+        banner.info("  | |_ __ _   _ ___| |_ ___  __| | | | | |_   _____ _ __| | ___   __| |");
+        banner.info("  | | '__| | | / __| __/ _ \\/ _` | | | | \\ \\ / / _ \\ '__| |/ _ \\ / _` |");
+        banner.info("  | | |  | |_| \\__ \\ ||  __/ (_| | \\ \\_/ /\\ V /  __/ |  | | (_) | (_| |");
+        banner.info("  \\_/_|   \\__,_|___/\\__\\___|\\__,_|  \\___/  \\_/ \\___|_|  |_|\\___/ \\__,_|");
+        banner.info("");
 
         logger.info("");
         logger.info("...will now check {} AWS accounts. ", args.length);
 
         for(String profile : args) {
 
-            logger.info("");
-            logger.info("=====================================================================");
-            logger.info("Checking Trusted Advisor for profile " + profile);
-            logger.info("=====================================================================");
+            banner.info("");
+            banner.info("=====================================================================");
+            banner.info("Checking Trusted Advisor for profile '{}'", profile);
+            banner.info("=====================================================================");
             try {
                 ProfileChecks profileChecks = trustedOverlordService.getProfileChecks(profile);
                 logger.info(" # Errors: {}", profileChecks.getErrors().size());
