@@ -28,27 +28,28 @@ public class TrustedOverlord {
         logger.info("  | | |  | |_| \\__ \\ ||  __/ (_| | \\ \\_/ /\\ V /  __/ |  | | (_) | (_| |");
         logger.info("  \\_/_|   \\__,_|___/\\__\\___|\\__,_|  \\___/  \\_/ \\___|_|  |_|\\___/ \\__,_|");
 
-        logger.info("\n");
-        logger.info("...will now check " + args.length + " AWS accounts. ");
+        logger.info("");
+        logger.info("...will now check {} AWS accounts. ", args.length);
 
         for(String profile : args) {
 
+            logger.info("");
             logger.info("=====================================================================");
             logger.info("Checking Trusted Advisor for profile " + profile);
             logger.info("=====================================================================");
             try {
                 ProfileChecks profileChecks = trustedOverlordService.getProfileChecks(profile);
-                logger.info(" # Errors: " + profileChecks.getErrors().size());
-                logger.info(" # Warnings: " + profileChecks.getWarnings().size());
+                logger.info(" # Errors: {}", profileChecks.getErrors().size());
+                logger.info(" # Warnings: {}", profileChecks.getWarnings().size());
 
                 logger.info("");
                 for(String error : profileChecks.getErrors()) {
-                    logger.error(" + Error: " + error);
+                    logger.error(" + Error: {}", error);
                 }
                 totalNumErrors += profileChecks.getErrors().size();
 
                 for(String error : profileChecks.getWarnings()) {
-                    logger.warn(" + Warning: " + error);
+                    logger.warn(" + Warning: {}", error);
                 }
                 totalNumWarnings += profileChecks.getWarnings().size();
 
@@ -58,10 +59,12 @@ public class TrustedOverlord {
 
         }
 
-        logger.info("\n\n");
+        logger.info("");
+        logger.info("");
         logger.info("**************************************************************************");
-        logger.info("TOTAL ERRORS: "+totalNumErrors);
-        logger.info("TOTAL WARNINGS: "+totalNumWarnings);
+        logger.info("TOTAL ERRORS: {}", totalNumErrors);
+        logger.info("TOTAL WARNINGS: {}", totalNumWarnings);
+        logger.info("**************************************************************************");
 
 
     }
