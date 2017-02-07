@@ -1,6 +1,7 @@
 package com.beeva.trustedoverlord.service.impl;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.support.AWSSupport;
 import com.amazonaws.services.support.AWSSupportClientBuilder;
 import com.amazonaws.services.support.model.*;
@@ -8,6 +9,7 @@ import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.service.TrustedOverlordService;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class TrustedOverlordServiceImpl implements TrustedOverlordService {
@@ -19,7 +21,7 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
         for(String profile : profiles) {
             AWSSupport awsSupport = AWSSupportClientBuilder.standard()
                     .withCredentials(new ProfileCredentialsProvider(profile))
-                    .withRegion("us-east-1").build();
+                    .withRegion(Regions.US_EAST_1.getName()).build();
             awsSupportMap.put(profile, awsSupport);
         }
     }
@@ -29,14 +31,13 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
         ProfileChecks result = new ProfileChecks();
 
         DescribeTrustedAdvisorChecksResult describeServicesResult = awsSupportMap.get(profile)
-                .describeTrustedAdvisorChecks(new DescribeTrustedAdvisorChecksRequest().withLanguage("en"));
+                .describeTrustedAdvisorChecks(new DescribeTrustedAdvisorChecksRequest().withLanguage(Locale.ENGLISH.getLanguage()));
 
         for(TrustedAdvisorCheckDescription trustedAdvisorCheckDescription : describeServicesResult.getChecks()) {
 
             TrustedAdvisorCheckResult trustedAdvisorCheckResult = awsSupportMap
                     .get(profile).describeTrustedAdvisorCheckResult(new DescribeTrustedAdvisorCheckResultRequest()
-                            .withCheckId(trustedAdvisorCheckDescription.getId()).withLanguage("en")).getResult();
-
+                            .withCheckId(trustedAdvisorCheckDescription.getId()).withLanguage(Locale.ENGLISH.getLanguage())).getResult();
             if("error".equals(trustedAdvisorCheckResult.getStatus())) {
                 result.addError(trustedAdvisorCheckDescription.getName());
             }
