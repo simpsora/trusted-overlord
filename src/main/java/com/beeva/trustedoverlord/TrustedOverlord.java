@@ -48,7 +48,7 @@ public class TrustedOverlord {
             banner.info("=====================================================================");
 
             try {
-                ProfileHealth profileHealth = trustedOverlordService.getProfileHealth(profile);
+                ProfileHealth profileHealth = trustedOverlordService.getProfileHealth(profile).get();
                 logger.info(" # Open Issues: {}", profileHealth.getOpenIssues().size());
                 logger.info(" # Schedules Changes: {}", profileHealth.getScheduledChanges().size());
                 logger.info(" # Other Notifications: {}", profileHealth.getOtherNotifications().size());
@@ -71,6 +71,10 @@ public class TrustedOverlord {
 
             } catch (AWSHealthException ex) {
                 logger.error("UNAUTHORIZED AWS Health", ex);
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error(e);
+            } finally {
+                trustedOverlordService.shutdown(TrustedOverlordService.TrustedApi.HEALTH);
             }
 
             banner.info("");
@@ -98,7 +102,7 @@ public class TrustedOverlord {
             } catch (InterruptedException | ExecutionException e) {
                 logger.error(e);
             } finally {
-                trustedOverlordService.shutdown();
+                trustedOverlordService.shutdown(TrustedOverlordService.TrustedApi.SUPPORT);
             }
 
         }

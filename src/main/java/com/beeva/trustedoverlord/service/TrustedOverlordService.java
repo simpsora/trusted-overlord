@@ -12,7 +12,9 @@ public interface TrustedOverlordService {
 
     Future<ProfileChecks> getProfileChecks(String profile);
 
-    ProfileHealth getProfileHealth(String profile);
+    Future<ProfileHealth> getProfileHealth(String profile);
 
-    void shutdown();
+    void shutdown(TrustedApi trustedApi);
+
+    enum TrustedApi { SUPPORT, HEALTH }
 }

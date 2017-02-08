@@ -1,6 +1,7 @@
 package com.beeva.trustedoverlord.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,9 +14,9 @@ public class ProfileHealth {
     private List<String> otherNotifications;
 
     public ProfileHealth() {
-        openIssues = new ArrayList<>();
-        scheduledChanges = new ArrayList<>();
-        otherNotifications = new ArrayList<>();
+        openIssues = Collections.synchronizedList(new ArrayList<>());
+        scheduledChanges = Collections.synchronizedList(new ArrayList<>());
+        otherNotifications = Collections.synchronizedList(new ArrayList<>());
     }
 
     public List<String> getOpenIssues() {
