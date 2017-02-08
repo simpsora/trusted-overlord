@@ -134,10 +134,10 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
         public void onSuccess(DescribeTrustedAdvisorChecksRequest request,
                               DescribeTrustedAdvisorChecksResult describeTrustedAdvisorChecksResult) {
 
-            describeTrustedAdvisorChecksResult.getChecks()
-                    .forEach(checkDescription -> {
+            List<Future<DescribeTrustedAdvisorCheckResultResult>> futures = new ArrayList<>();
 
-                        List<Future<DescribeTrustedAdvisorCheckResultResult>> futures = new ArrayList<>();
+            describeTrustedAdvisorChecksResult.getChecks()
+                    .forEach(checkDescription ->
                         futures.add(
                                 awsSupportMap.get(this.profile)
                                     .describeTrustedAdvisorCheckResultAsync(
@@ -146,16 +146,20 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
                                                     .withLanguage(Locale.ENGLISH.getLanguage()),
                                             new DescribeTrustedAdvisorChecksResultHandler(checkDescription, this.profileChecks)
                                     )
-                        );
+                        )
+                    );
 
-                        futures.forEach(future -> {
-                            try {
-                                future.get(2, TimeUnit.SECONDS);
-                            } catch (InterruptedException | ExecutionException | TimeoutException ignored) {}
-                        });
-                    });
+            waitForFuturesToComplete(futures);
 
             this.profileChecksFuture.complete(this.profileChecks);
+        }
+
+        private void waitForFuturesToComplete(List<Future<DescribeTrustedAdvisorCheckResultResult>> futures) {
+            futures.forEach(future -> {
+                try {
+                    future.get(2, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException | TimeoutException ignored) {}
+            });
         }
     }
 
