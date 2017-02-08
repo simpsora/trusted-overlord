@@ -2,6 +2,7 @@ package com.beeva.trustedoverlord;
 
 import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.ProfileChecks;
+import com.beeva.trustedoverlord.model.ProfileHealth;
 import com.beeva.trustedoverlord.service.TrustedOverlordService;
 import com.beeva.trustedoverlord.service.impl.TrustedOverlordServiceImpl;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +22,9 @@ public class TrustedOverlord {
 
         int totalNumWarnings = 0;
         int totalNumErrors = 0;
+        int totalNumOpenIssues = 0;
+        int totalNumSchedulesChanges = 0;
+        int totalNumOtherNotifications = 0;
 
         banner.info(" _____              _           _   _____                _           _");
         banner.info("|_   _|            | |         | | |  _  |              | |         | |");
@@ -37,14 +41,45 @@ public class TrustedOverlord {
 
             banner.info("");
             banner.info("=====================================================================");
+            banner.info("Checking Health for profile '{}'", profile);
+            banner.info("=====================================================================");
+
+            try {
+                ProfileHealth profileHealth = trustedOverlordService.getProfileHealth(profile);
+                logger.info(" # Open Issues: {}", profileHealth.getOpenIssues().size());
+                logger.info(" # Schedules Changes: {}", profileHealth.getScheduledChanges().size());
+                logger.info(" # Other Notifications: {}", profileHealth.getOtherNotifications().size());
+                logger.info("");
+
+                for(String openIssue : profileHealth.getOpenIssues()) {
+                    logger.error(" + Open Issue: {}", openIssue);
+                }
+                totalNumOpenIssues += profileHealth.getOpenIssues().size();
+
+                for(String scheduledChange : profileHealth.getScheduledChanges()) {
+                    logger.warn(" + Scheduled Change: {}", scheduledChange);
+                }
+                totalNumSchedulesChanges += profileHealth.getScheduledChanges().size();
+
+                for(String otherNotificacion : profileHealth.getOtherNotifications()) {
+                    logger.info(" + Other Notification: {}", otherNotificacion);
+                }
+                totalNumOtherNotifications += profileHealth.getOtherNotifications().size();
+
+            } catch (AWSSupportException ex) {
+                logger.error("UNAUTHORIZED");
+            }
+
+            banner.info("");
+            banner.info("=====================================================================");
             banner.info("Checking Trusted Advisor for profile '{}'", profile);
             banner.info("=====================================================================");
             try {
                 ProfileChecks profileChecks = trustedOverlordService.getProfileChecks(profile);
                 logger.info(" # Errors: {}", profileChecks.getErrors().size());
                 logger.info(" # Warnings: {}", profileChecks.getWarnings().size());
-
                 logger.info("");
+
                 for(String error : profileChecks.getErrors()) {
                     logger.error(" + Error: {}", error);
                 }
@@ -64,6 +99,9 @@ public class TrustedOverlord {
         banner.info("");
         banner.info("");
         banner.info("**************************************************************************");
+        banner.info("TOTAL OPEN ISSUES: {}", totalNumOpenIssues);
+        banner.info("TOTAL SCHEDULED CHANGES: {}", totalNumSchedulesChanges);
+        banner.info("TOTAL OTHER NOTIFICATIONS : {}", totalNumOtherNotifications);
         banner.info("TOTAL ERRORS: {}", totalNumErrors);
         banner.info("TOTAL WARNINGS: {}", totalNumWarnings);
         banner.info("**************************************************************************");
