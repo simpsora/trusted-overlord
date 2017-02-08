@@ -150,12 +150,12 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
 
                         futures.forEach(future -> {
                             try {
-                                future.get(1, TimeUnit.SECONDS);
+                                future.get(2, TimeUnit.SECONDS);
                             } catch (InterruptedException | ExecutionException | TimeoutException ignored) {}
                         });
-
-                        this.profileChecksFuture.complete(this.profileChecks);
                     });
+
+            this.profileChecksFuture.complete(this.profileChecks);
         }
     }
 
