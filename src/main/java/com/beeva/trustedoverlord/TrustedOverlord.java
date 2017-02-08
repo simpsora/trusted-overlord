@@ -1,5 +1,6 @@
 package com.beeva.trustedoverlord;
 
+import com.amazonaws.services.health.model.AWSHealthException;
 import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
@@ -7,6 +8,8 @@ import com.beeva.trustedoverlord.service.TrustedOverlordService;
 import com.beeva.trustedoverlord.service.impl.TrustedOverlordServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by cesarsilgo on 1/02/17.
@@ -61,13 +64,13 @@ public class TrustedOverlord {
                 }
                 totalNumSchedulesChanges += profileHealth.getScheduledChanges().size();
 
-                for(String otherNotificacion : profileHealth.getOtherNotifications()) {
-                    logger.info(" + Other Notification: {}", otherNotificacion);
+                for(String otherNotification : profileHealth.getOtherNotifications()) {
+                    logger.info(" + Other Notification: {}", otherNotification);
                 }
                 totalNumOtherNotifications += profileHealth.getOtherNotifications().size();
 
-            } catch (AWSSupportException ex) {
-                logger.error("UNAUTHORIZED");
+            } catch (AWSHealthException ex) {
+                logger.error("UNAUTHORIZED AWS Health", ex);
             }
 
             banner.info("");
@@ -75,7 +78,7 @@ public class TrustedOverlord {
             banner.info("Checking Trusted Advisor for profile '{}'", profile);
             banner.info("=====================================================================");
             try {
-                ProfileChecks profileChecks = trustedOverlordService.getProfileChecks(profile);
+                ProfileChecks profileChecks = trustedOverlordService.getProfileChecks(profile).get();
                 logger.info(" # Errors: {}", profileChecks.getErrors().size());
                 logger.info(" # Warnings: {}", profileChecks.getWarnings().size());
                 logger.info("");
@@ -91,7 +94,11 @@ public class TrustedOverlord {
                 totalNumWarnings += profileChecks.getWarnings().size();
 
             } catch (AWSSupportException ex) {
-                logger.error("UNAUTHORIZED");
+                logger.error("UNAUTHORIZED AWS Support", ex);
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error(e);
+            } finally {
+                trustedOverlordService.shutdown();
             }
 
         }
