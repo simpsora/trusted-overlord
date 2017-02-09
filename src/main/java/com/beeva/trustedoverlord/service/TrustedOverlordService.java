@@ -2,6 +2,7 @@ package com.beeva.trustedoverlord.service;
 
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
+import com.beeva.trustedoverlord.model.SupportCases;
 
 import java.util.concurrent.Future;
 
@@ -14,7 +15,9 @@ public interface TrustedOverlordService {
 
     Future<ProfileHealth> getProfileHealth(String profile);
 
+    Future<SupportCases> getSupportCases(String profile);
+
     void shutdown(TrustedApi trustedApi);
 
-    enum TrustedApi { SUPPORT, HEALTH }
+    enum TrustedApi {TRUSTED_ADVISOR, HEALTH, SUPPORT }
 }

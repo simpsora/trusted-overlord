@@ -4,6 +4,7 @@ import com.amazonaws.services.health.model.AWSHealthException;
 import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
+import com.beeva.trustedoverlord.model.SupportCases;
 import com.beeva.trustedoverlord.service.TrustedOverlordService;
 import com.beeva.trustedoverlord.service.impl.TrustedOverlordServiceImpl;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,8 @@ public class TrustedOverlord {
         int totalNumOpenIssues = 0;
         int totalNumSchedulesChanges = 0;
         int totalNumOtherNotifications = 0;
+        int totalOpenCases = 0;
+        int totalResolvedCases = 0;
 
         banner.info(" _____              _           _   _____                _               _");
         banner.info("|_   _|            | |         | | |  _  |              | |             | |");
@@ -98,6 +101,36 @@ public class TrustedOverlord {
                 totalNumWarnings += profileChecks.getWarnings().size();
 
             } catch (AWSSupportException ex) {
+                logger.error("UNAUTHORIZED AWS Trusted Advisor", ex);
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error(e);
+            } finally {
+                trustedOverlordService.shutdown(TrustedOverlordService.TrustedApi.TRUSTED_ADVISOR);
+            }
+
+            banner.info("");
+            banner.info("=====================================================================");
+            banner.info("Checking AWS Support Cases for profile '{}'", profile);
+            banner.info("=====================================================================");
+
+            try {
+                SupportCases supportCases = trustedOverlordService.getSupportCases(profile).get();
+                logger.info(" # Open Cases: {}", supportCases.getOpenCases().size());
+                logger.info(" # Resolved Cases: {}", supportCases.getResolvedCases().size());
+                logger.info("");
+
+                for (SupportCases.Case caseDetail : supportCases.getOpenCases()){
+                    logger.warn(" + Open Case: {}", caseDetail);
+                }
+                totalOpenCases += supportCases.getOpenCases().size();
+
+                for (SupportCases.Case caseDetail : supportCases.getResolvedCases()){
+                    logger.info(" + Resolved Case: {}", caseDetail);
+                }
+                totalResolvedCases += supportCases.getResolvedCases().size();
+
+
+            } catch (AWSSupportException ex) {
                 logger.error("UNAUTHORIZED AWS Support", ex);
             } catch (InterruptedException | ExecutionException e) {
                 logger.error(e);
@@ -115,6 +148,8 @@ public class TrustedOverlord {
         banner.info("TOTAL OTHER NOTIFICATIONS : {}", totalNumOtherNotifications);
         banner.info("TOTAL ERRORS: {}", totalNumErrors);
         banner.info("TOTAL WARNINGS: {}", totalNumWarnings);
+        banner.info("TOTAL OPEN CASES: {}", totalOpenCases);
+        banner.info("TOTAL RESOLVED CASES: {}", totalResolvedCases);
         banner.info("**************************************************************************");
 
 

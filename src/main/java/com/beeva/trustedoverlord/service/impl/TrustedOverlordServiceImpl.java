@@ -13,13 +13,10 @@ import com.amazonaws.services.health.model.EventStatusCode;
 import com.amazonaws.services.health.model.EventTypeCategory;
 import com.amazonaws.services.support.AWSSupportAsync;
 import com.amazonaws.services.support.AWSSupportAsyncClientBuilder;
-import com.amazonaws.services.support.model.DescribeTrustedAdvisorCheckResultRequest;
-import com.amazonaws.services.support.model.DescribeTrustedAdvisorCheckResultResult;
-import com.amazonaws.services.support.model.DescribeTrustedAdvisorChecksRequest;
-import com.amazonaws.services.support.model.DescribeTrustedAdvisorChecksResult;
-import com.amazonaws.services.support.model.TrustedAdvisorCheckDescription;
+import com.amazonaws.services.support.model.*;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
+import com.beeva.trustedoverlord.model.SupportCases;
 import com.beeva.trustedoverlord.service.TrustedOverlordService;
 
 import java.util.ArrayList;
@@ -35,28 +32,35 @@ import java.util.concurrent.TimeoutException;
 
 public class TrustedOverlordServiceImpl implements TrustedOverlordService {
 
-    private Map<String, AWSSupportAsync> awsSupportMap;
+    private Map<String, AWSSupportAsync> awsTrustedMap;
     private Map<String, AWSHealthAsync> awsHealthMap;
+    private Map<String, AWSSupportAsync> awsSupportMap;
 
     public TrustedOverlordServiceImpl(final String[] profiles) {
 
-        awsSupportMap = new HashMap<>(profiles.length);
+        awsTrustedMap = new HashMap<>(profiles.length);
         awsHealthMap = new HashMap<>(profiles.length);
+        awsSupportMap = new HashMap<>(profiles.length);
         ProfileCredentialsProvider profileCredentialsProvider;
 
         for (String profile : profiles) {
 
             profileCredentialsProvider = new ProfileCredentialsProvider(profile);
 
-            AWSSupportAsync awsSupport = AWSSupportAsyncClientBuilder.standard()
+            AWSSupportAsync awsTrusted = AWSSupportAsyncClientBuilder.standard()
                     .withCredentials(profileCredentialsProvider)
                     .withRegion(Regions.US_EAST_1.getName()).build();
-            awsSupportMap.put(profile, awsSupport);
+            awsTrustedMap.put(profile, awsTrusted);
 
             AWSHealthAsync awsHealth = AWSHealthAsyncClientBuilder.standard()
                     .withCredentials(profileCredentialsProvider)
                     .withRegion(Regions.US_EAST_1.getName()).build();
             awsHealthMap.put(profile, awsHealth);
+
+            AWSSupportAsync awsSupport = AWSSupportAsyncClientBuilder.standard()
+                    .withCredentials(profileCredentialsProvider)
+                    .withRegion(Regions.US_EAST_1.getName()).build();
+            awsSupportMap.put(profile, awsSupport);
         }
 
     }
@@ -64,17 +68,17 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
     @Override
     public Future<ProfileChecks> getProfileChecks(final String profile) {
 
-        CompletableFuture<ProfileChecks> result = new CompletableFuture<>();
+        CompletableFuture<ProfileChecks> future = new CompletableFuture<>();
 
         ProfileChecks checks = new ProfileChecks();
 
-        awsSupportMap.get(profile)
+        awsTrustedMap.get(profile)
                 .describeTrustedAdvisorChecksAsync(
                         new DescribeTrustedAdvisorChecksRequest().withLanguage(Locale.ENGLISH.getLanguage()),
-                        new TrustedAdvisorChecksResultHandler(profile, checks, result)
+                        new TrustedAdvisorChecksResultHandler(profile, checks, future)
                 );
 
-        return result;
+        return future;
 
     }
 
@@ -91,10 +95,21 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
     }
 
     @Override
+    public Future<SupportCases> getSupportCases(final String profile) {
+        SupportCases cases = new SupportCases();
+        CompletableFuture<SupportCases> future = new CompletableFuture<>();
+
+        describeCases(profile, null, cases, future);
+
+        return future;
+    }
+
+    @Override
     public void shutdown(TrustedApi trustedApi) {
         switch (trustedApi){
-            case SUPPORT: awsSupportMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
+            case TRUSTED_ADVISOR: awsTrustedMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
             case HEALTH: awsHealthMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
+            case SUPPORT: awsSupportMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
         }
 
 
@@ -126,7 +141,7 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
             describeTrustedAdvisorChecksResult.getChecks()
                     .forEach(checkDescription ->
                             futures.add(
-                                    awsSupportMap.get(this.profile)
+                                    awsTrustedMap.get(this.profile)
                                             .describeTrustedAdvisorCheckResultAsync(
                                                     new DescribeTrustedAdvisorCheckResultRequest()
                                                             .withCheckId(checkDescription.getId())
@@ -208,6 +223,46 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
                                 }
                                 else {
                                     future.complete(profileHealth);
+                                }
+                            }
+                        });
+    }
+
+    private void describeCases(String profile, String nextToken, final SupportCases cases, final CompletableFuture<SupportCases> future) {
+        awsSupportMap.get(profile)
+                .describeCasesAsync(new DescribeCasesRequest()
+                                .withIncludeResolvedCases(true)
+                                .withIncludeCommunications(false)
+                                .withNextToken(nextToken),
+                        new AsyncHandler<DescribeCasesRequest, DescribeCasesResult>() {
+                            @Override
+                            public void onError(Exception exception) {
+                                future.completeExceptionally(exception);
+                            }
+
+                            @Override
+                            public void onSuccess(DescribeCasesRequest request, DescribeCasesResult describeCasesResult) {
+                                describeCasesResult.getCases().forEach(caseDetails -> {
+                                    if ("resolved".equalsIgnoreCase(caseDetails.getStatus())){
+                                        cases.addResolvedCase(
+                                                caseDetails.getCaseId(), caseDetails.getTimeCreated(),
+                                                caseDetails.getStatus(), caseDetails.getSubmittedBy(), caseDetails.getSubject()
+                                        );
+                                    }
+                                    else {
+                                        cases.addOpenCase(
+                                                caseDetails.getCaseId(), caseDetails.getTimeCreated(),
+                                                caseDetails.getStatus(), caseDetails.getSubmittedBy(), caseDetails.getSubject()
+                                        );
+                                    }
+                                });
+
+                                String returnedNextToken = describeCasesResult.getNextToken();
+                                if (returnedNextToken != null && !returnedNextToken.isEmpty()){
+                                    describeCases(profile, returnedNextToken, cases, future);
+                                }
+                                else {
+                                    future.complete(cases);
                                 }
                             }
                         });
