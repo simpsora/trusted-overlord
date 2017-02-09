@@ -3,8 +3,8 @@
 
 ## Purpose
 
-Trusted Overlord  is a Java tool aimed to aggregate AWS Trusted Advisor alarms from different accounts
-and build a brief report with the results.
+Trusted Overlord  is a Java tool aimed to aggregate AWS Trusted Advisor alarms, AWS Health Notifications 
+and AWS Support cases from different accounts and build a brief summary with the results.
 
 ## Usage
 
