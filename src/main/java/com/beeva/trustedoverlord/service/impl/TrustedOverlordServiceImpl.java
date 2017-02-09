@@ -142,7 +142,7 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
         }
 
         private void waitForFuturesToComplete(List<Future<DescribeTrustedAdvisorCheckResultResult>> futures) {
-            futures.forEach(future -> {
+            futures.parallelStream().forEach(future -> {
                 try {
                     future.get(2, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
