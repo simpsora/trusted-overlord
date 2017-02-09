@@ -1,5 +1,4 @@
-![Logo](static/logo.png "Logo")
-# Trusted Overlord
+![Logo](static/logo.png "Trusted Overlord")
 
 ## Purpose
 
@@ -14,7 +13,7 @@ Build Trusted Overlord using Maven with
 mvn clean compile package
 ```
 
-Run Trusted Overlod passing your profile names as arguments.
+Run Trusted Overlord passing your profile names as arguments.
 
 ```
 java -jar trustedoverlord-1.0-SNAPSHOT.jar profileName1 profileName2...
@@ -25,12 +24,12 @@ Please note that you must configure permissions using the [standard method](http
 ## Output
 
 ```
- _____              _           _   _____                _           _
-|_   _|            | |         | | |  _  |              | |         | |
-  | |_ __ _   _ ___| |_ ___  __| | | | | |_   _____ _ __| | ___   __| |
-  | | '__| | | / __| __/ _ \/ _` | | | | \ \ / / _ \ '__| |/ _ \ / _` |
-  | | |  | |_| \__ \ ||  __/ (_| | \ \_/ /\ V /  __/ |  | | (_) | (_| |
-  \_/_|   \__,_|___/\__\___|\__,_|  \___/  \_/ \___|_|  |_|\___/ \__,_|
+ _____              _           _   _____                _               _
+|_   _|            | |         | | |  _  |              | |             | |
+  | |_ __ _   _ ___| |_ ___  __| | | | | |_   _____ _ __| | ___  _ __ __| |
+  | | '__| | | / __| __/ _ \/ _` | | | | \ \ / / _ \ '__| |/ _ \| '__/ _` |
+  | | |  | |_| \__ \ ||  __/ (_| | \ \_/ /\ V /  __/ |  | | (_) | |  |(_| |
+  \_/_|   \__,_|___/\__\___|\__,_|  \___/  \_/ \___|_|  |_|\___/|_|  \__,_|
 
 
 2017-02-08T10:27:35,262 INFO  [main] c.b.t.TrustedOverlord: ...will now check 1 AWS accounts.
