@@ -1,6 +1,7 @@
 package com.beeva.trustedoverlord.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,8 +13,8 @@ public class ProfileChecks {
     private List<String> warnings;
 
     public ProfileChecks() {
-        this.errors = new ArrayList<>();
-        this.warnings = new ArrayList<>();
+        this.errors = Collections.synchronizedList(new ArrayList<>());
+        this.warnings = Collections.synchronizedList(new ArrayList<>());
     }
 
     public List<String> getErrors() {

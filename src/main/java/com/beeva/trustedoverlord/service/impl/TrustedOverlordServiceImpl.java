@@ -1,25 +1,42 @@
 package com.beeva.trustedoverlord.service.impl;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.health.AWSHealth;
-import com.amazonaws.services.health.AWSHealthClientBuilder;
-import com.amazonaws.services.health.model.*;
-import com.amazonaws.services.support.AWSSupport;
-import com.amazonaws.services.support.AWSSupportClientBuilder;
-import com.amazonaws.services.support.model.*;
+import com.amazonaws.services.health.AWSHealthAsync;
+import com.amazonaws.services.health.AWSHealthAsyncClientBuilder;
+import com.amazonaws.services.health.model.DescribeEventsRequest;
+import com.amazonaws.services.health.model.DescribeEventsResult;
+import com.amazonaws.services.health.model.Event;
+import com.amazonaws.services.health.model.EventFilter;
+import com.amazonaws.services.health.model.EventStatusCode;
+import com.amazonaws.services.health.model.EventTypeCategory;
+import com.amazonaws.services.support.AWSSupportAsync;
+import com.amazonaws.services.support.AWSSupportAsyncClientBuilder;
+import com.amazonaws.services.support.model.DescribeTrustedAdvisorCheckResultRequest;
+import com.amazonaws.services.support.model.DescribeTrustedAdvisorCheckResultResult;
+import com.amazonaws.services.support.model.DescribeTrustedAdvisorChecksRequest;
+import com.amazonaws.services.support.model.DescribeTrustedAdvisorChecksResult;
+import com.amazonaws.services.support.model.TrustedAdvisorCheckDescription;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
 import com.beeva.trustedoverlord.service.TrustedOverlordService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class TrustedOverlordServiceImpl implements TrustedOverlordService {
 
-    private Map<String,AWSSupport> awsSupportMap;
-    private Map<String,AWSHealth> awsHealthMap;
+    private Map<String, AWSSupportAsync> awsSupportMap;
+    private Map<String, AWSHealthAsync> awsHealthMap;
 
     public TrustedOverlordServiceImpl(final String[] profiles) {
 
@@ -27,16 +44,16 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
         awsHealthMap = new HashMap<>(profiles.length);
         ProfileCredentialsProvider profileCredentialsProvider;
 
-        for(String profile : profiles) {
+        for (String profile : profiles) {
 
             profileCredentialsProvider = new ProfileCredentialsProvider(profile);
 
-            AWSSupport awsSupport = AWSSupportClientBuilder.standard()
+            AWSSupportAsync awsSupport = AWSSupportAsyncClientBuilder.standard()
                     .withCredentials(profileCredentialsProvider)
                     .withRegion(Regions.US_EAST_1.getName()).build();
             awsSupportMap.put(profile, awsSupport);
 
-            AWSHealth awsHealth = AWSHealthClientBuilder.standard()
+            AWSHealthAsync awsHealth = AWSHealthAsyncClientBuilder.standard()
                     .withCredentials(profileCredentialsProvider)
                     .withRegion(Regions.US_EAST_1.getName()).build();
             awsHealthMap.put(profile, awsHealth);
@@ -44,61 +61,155 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
 
     }
 
-    public ProfileChecks getProfileChecks(final String profile) {
+    @Override
+    public Future<ProfileChecks> getProfileChecks(final String profile) {
 
-        ProfileChecks result = new ProfileChecks();
+        CompletableFuture<ProfileChecks> result = new CompletableFuture<>();
 
-        DescribeTrustedAdvisorChecksResult describeServicesResult = awsSupportMap.get(profile)
-                .describeTrustedAdvisorChecks(new DescribeTrustedAdvisorChecksRequest()
-                        .withLanguage(Locale.ENGLISH.getLanguage()));
+        ProfileChecks checks = new ProfileChecks();
 
-        for(TrustedAdvisorCheckDescription trustedAdvisorCheckDescription : describeServicesResult.getChecks()) {
+        awsSupportMap.get(profile)
+                .describeTrustedAdvisorChecksAsync(
+                        new DescribeTrustedAdvisorChecksRequest().withLanguage(Locale.ENGLISH.getLanguage()),
+                        new TrustedAdvisorChecksResultHandler(profile, checks, result)
+                );
 
-            TrustedAdvisorCheckResult trustedAdvisorCheckResult = awsSupportMap
-                    .get(profile).describeTrustedAdvisorCheckResult(new DescribeTrustedAdvisorCheckResultRequest()
-                            .withCheckId(trustedAdvisorCheckDescription.getId())
-                            .withLanguage(Locale.ENGLISH.getLanguage())).getResult();
-            if("error".equals(trustedAdvisorCheckResult.getStatus())) {
-                result.addError(trustedAdvisorCheckDescription.getName());
-            }
-            else if("warning".equals(trustedAdvisorCheckResult.getStatus())) {
-                result.addWarning(trustedAdvisorCheckDescription.getName());
-            }
+        return result;
+
+    }
+
+    @Override
+    public Future<ProfileHealth> getProfileHealth(final String profile) {
+
+        ProfileHealth profileHealth = new ProfileHealth();
+        CompletableFuture<ProfileHealth> future = new CompletableFuture<>();
+
+        describeEventAsync(profile, null, profileHealth, future);
+
+        return future;
+
+    }
+
+    @Override
+    public void shutdown(TrustedApi trustedApi) {
+        switch (trustedApi){
+            case SUPPORT: awsSupportMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
+            case HEALTH: awsHealthMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
         }
 
-        return result;
 
     }
 
-    public ProfileHealth getProfileHealth(final String profile) {
+    private class TrustedAdvisorChecksResultHandler implements AsyncHandler<DescribeTrustedAdvisorChecksRequest, DescribeTrustedAdvisorChecksResult> {
 
-        ProfileHealth result = new ProfileHealth();
-        String nextToken = null;
+        private String profile;
+        private ProfileChecks profileChecks;
+        private CompletableFuture<ProfileChecks> profileChecksFuture;
 
-        do {
+        public TrustedAdvisorChecksResultHandler(String profile, ProfileChecks profileChecks, CompletableFuture<ProfileChecks> profileChecksFuture) {
+            this.profile = profile;
+            this.profileChecks = profileChecks;
+            this.profileChecksFuture = profileChecksFuture;
+        }
 
-            DescribeEventsResult describeEventsResult = awsHealthMap.get(profile)
-                    .describeEvents(new DescribeEventsRequest().withFilter(new EventFilter()
-                            .withEventStatusCodes(EventStatusCode.Open, EventStatusCode.Upcoming))
-                    .withNextToken(nextToken));
+        @Override
+        public void onError(Exception e) {
+            profileChecksFuture.completeExceptionally(e);
+        }
 
-            for (Event event : describeEventsResult.getEvents()) {
-                // TODO: Blame AWS for not using the same type for both values
-                if (event.getEventTypeCategory().equals(EventTypeCategory.Issue.toString())) {
-                    result.addOpenIssue(event.getEventTypeCode());
-                } else if (event.getEventTypeCategory().equals(EventTypeCategory.AccountNotification.toString())) {
-                    result.addOtherNotifications(event.getEventTypeCode());
-                } else if ((event.getEventTypeCategory().equals(EventTypeCategory.ScheduledChange.toString()))) {
-                    result.addScheduledChange(event.getEventTypeCode());
+        @Override
+        public void onSuccess(DescribeTrustedAdvisorChecksRequest request,
+                              DescribeTrustedAdvisorChecksResult describeTrustedAdvisorChecksResult) {
+
+            List<Future<DescribeTrustedAdvisorCheckResultResult>> futures = new ArrayList<>();
+
+            describeTrustedAdvisorChecksResult.getChecks()
+                    .forEach(checkDescription ->
+                            futures.add(
+                                    awsSupportMap.get(this.profile)
+                                            .describeTrustedAdvisorCheckResultAsync(
+                                                    new DescribeTrustedAdvisorCheckResultRequest()
+                                                            .withCheckId(checkDescription.getId())
+                                                            .withLanguage(Locale.ENGLISH.getLanguage()),
+                                                    new DescribeTrustedAdvisorChecksResultHandler(checkDescription, this.profileChecks)
+                                            )
+                            )
+                    );
+
+            waitForFuturesToComplete(futures);
+
+            this.profileChecksFuture.complete(this.profileChecks);
+        }
+
+        private void waitForFuturesToComplete(List<Future<DescribeTrustedAdvisorCheckResultResult>> futures) {
+            futures.forEach(future -> {
+                try {
+                    future.get(2, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
                 }
-            }
-
-            nextToken = describeEventsResult.getNextToken();
-
-        } while(nextToken!=null && !nextToken.isEmpty());
-
-        return result;
-
+            });
+        }
     }
 
+    private class DescribeTrustedAdvisorChecksResultHandler implements AsyncHandler<DescribeTrustedAdvisorCheckResultRequest, DescribeTrustedAdvisorCheckResultResult> {
+
+        TrustedAdvisorCheckDescription checkDescription;
+        ProfileChecks profileChecks;
+
+
+        public DescribeTrustedAdvisorChecksResultHandler(TrustedAdvisorCheckDescription checkDescription, ProfileChecks profileChecks) {
+            this.checkDescription = checkDescription;
+            this.profileChecks = profileChecks;
+        }
+
+        @Override
+        public void onError(Exception e) {
+        }
+
+        @Override
+        public void onSuccess(DescribeTrustedAdvisorCheckResultRequest request,
+                              DescribeTrustedAdvisorCheckResultResult describeTrustedAdvisorCheckResult) {
+            if ("error".equals(describeTrustedAdvisorCheckResult.getResult().getStatus())) {
+                profileChecks.addError(checkDescription.getName());
+            } else if ("warning".equals(describeTrustedAdvisorCheckResult.getResult().getStatus())) {
+                profileChecks.addWarning(checkDescription.getName());
+            }
+        }
+    }
+
+    private void describeEventAsync(String profile, String nextToken, final ProfileHealth profileHealth, final CompletableFuture<ProfileHealth> future) {
+        awsHealthMap.get(profile)
+                .describeEventsAsync(new DescribeEventsRequest().withFilter(
+                        new EventFilter()
+                                .withEventStatusCodes(EventStatusCode.Open, EventStatusCode.Upcoming))
+                                .withNextToken(nextToken),
+                        new AsyncHandler<DescribeEventsRequest, DescribeEventsResult>() {
+                            @Override
+                            public void onError(Exception exception) {
+                                future.completeExceptionally(exception);
+                            }
+
+                            @Override
+                            public void onSuccess(DescribeEventsRequest request, DescribeEventsResult describeEventsResult) {
+                                for (Event event : describeEventsResult.getEvents()) {
+                                    // TODO: Blame AWS for not using the same type for both values
+                                    if (event.getEventTypeCategory().equals(EventTypeCategory.Issue.toString())) {
+                                        profileHealth.addOpenIssue(event.getEventTypeCode());
+                                    } else if (event.getEventTypeCategory().equals(EventTypeCategory.AccountNotification.toString())) {
+                                        profileHealth.addOtherNotifications(event.getEventTypeCode());
+                                    } else if ((event.getEventTypeCategory().equals(EventTypeCategory.ScheduledChange.toString()))) {
+                                        profileHealth.addScheduledChange(event.getEventTypeCode());
+                                    }
+                                }
+
+                                String returnedNextToken = describeEventsResult.getNextToken();
+                                if (returnedNextToken != null && !returnedNextToken.isEmpty()){
+                                    describeEventAsync(profile, returnedNextToken, profileHealth, future);
+                                }
+                                else {
+                                    future.complete(profileHealth);
+                                }
+                            }
+                        });
+    }
 }
