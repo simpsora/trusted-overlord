@@ -2,8 +2,12 @@
 
 ## Purpose
 
-Trusted Overlord  is a Java tool aimed to aggregate AWS Trusted Advisor alarms, AWS Health Notifications 
-and AWS Support cases from different accounts and build a brief summary with the results.
+Tired of navigating for dozens of AWS Web Consoles to check your accounts status? Join the DevOps revolution.
+
+Trusted Overlord is a tool aimed to aggregate AWS Trusted Advisor alarms, AWS Health notifications and AWS Support cases
+from several AWS accounts and build a brief summary with the results.
+
+In the future we want to provide the ability to operate those accounts from a single web dashboard in a seamless way.
 
 ## Usage
 
@@ -19,7 +23,7 @@ Run Trusted Overlord passing your profile names as arguments.
 java -jar trustedoverlord-1.0-SNAPSHOT.jar profileName1 profileName2...
 ```
 
-Please note that you must configure permissions using the [standard method](https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/)
+Please note that you must configure permissions using the [standard AWS Credentials management method](https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/)
 
 ## Output
 
