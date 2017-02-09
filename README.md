@@ -1,5 +1,4 @@
-![Logo](static/logo.png "Logo")
-# Trusted Overlord
+![Logo](static/logo.png "Trusted Overlord")
 
 ## Purpose
 
