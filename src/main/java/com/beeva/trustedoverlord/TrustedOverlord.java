@@ -111,7 +111,6 @@ public class TrustedOverlord {
             try {
                 ProfileSupportCases profileSupportCases = trustedOverlordService.getSupportCases(profile).get();
                 logger.info(" # Open Cases: {}", profileSupportCases.getOpenCases().size());
-                logger.info(" # Resolved Cases: {}", profileSupportCases.getResolvedCases().size());
                 logger.info("");
 
                 for (ProfileSupportCases.Case caseDetail : profileSupportCases.getOpenCases()){
