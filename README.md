@@ -71,6 +71,18 @@ Checking Trusted Advisor for profile 'profileName1'
 2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Amazon S3 Bucket Versioning
 
 =====================================================================
+Checking AWS Support Cases for profile 'profileName1'
+=====================================================================
+2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlord:  # Open Cases: 0
+2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlord:  # Resolved Cases: 4
+2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlord: 
+2017-02-08T10:27:48,742 INFO  [main] c.b.t.TrustedOverlord:  + Resolved Case: Case{id='case-319671-muen-2017-d1f1be5d25b0e3e3', created='2017-01-04T13:48:52.000Z', status='resolved', submittedBy='trustedoverlord@beeva.com', subject='Limit Increase: Elastic IPs - EC2 Classic'}
+2017-02-08T10:27:48,742 INFO  [main] c.b.t.TrustedOverlord:  + Resolved Case: Case{id='case-318672-muen-2017-8b73a32431b240cc', created='2017-01-04T13:49:26.000Z', status='resolved', submittedBy='trustedoverlord@beeva.com', subject='Limit Increase: Elastic IPs - EC2 Classic'}
+2017-02-08T10:27:48,742 INFO  [main] c.b.t.TrustedOverlord:  + Resolved Case: Case{id='case-317673-muen-2017-d10ae56c69518a80', created='2017-01-17T15:32:24.000Z', status='resolved', submittedBy='trustedoverlord@beeva.com', subject='Limit Increase: VPC'}
+2017-02-08T10:27:48,742 INFO  [main] c.b.t.TrustedOverlord:  + Resolved Case: Case{id='case-316674-muen-2017-ea77c4b29a43bd15', created='2017-01-17T15:33:02.000Z', status='resolved', submittedBy='trustedoverlord@beeva.com', subject='Limit Increase: VPC'}
+
+
+=====================================================================
 Checking Health for profile 'profileName2'
 =====================================================================
 ...
