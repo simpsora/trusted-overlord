@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SupportCases {
+public class ProfileSupportCases {
 
     private List<Case> openCases;
     private List<Case> resolvedCases;
 
 
-    public SupportCases() {
+    public ProfileSupportCases() {
         this.openCases = Collections.synchronizedList(new ArrayList<>());
         this.resolvedCases= Collections.synchronizedList(new ArrayList<>());
     }

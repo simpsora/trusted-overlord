@@ -16,7 +16,7 @@ import com.amazonaws.services.support.AWSSupportAsyncClientBuilder;
 import com.amazonaws.services.support.model.*;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
-import com.beeva.trustedoverlord.model.SupportCases;
+import com.beeva.trustedoverlord.model.ProfileSupportCases;
 import com.beeva.trustedoverlord.service.TrustedOverlordService;
 
 import java.util.ArrayList;
@@ -95,9 +95,9 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
     }
 
     @Override
-    public Future<SupportCases> getSupportCases(final String profile) {
-        SupportCases cases = new SupportCases();
-        CompletableFuture<SupportCases> future = new CompletableFuture<>();
+    public Future<ProfileSupportCases> getSupportCases(final String profile) {
+        ProfileSupportCases cases = new ProfileSupportCases();
+        CompletableFuture<ProfileSupportCases> future = new CompletableFuture<>();
 
         describeCases(profile, null, cases, future);
 
@@ -105,14 +105,10 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
     }
 
     @Override
-    public void shutdown(TrustedApi trustedApi) {
-        switch (trustedApi){
-            case TRUSTED_ADVISOR: awsTrustedMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
-            case HEALTH: awsHealthMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
-            case SUPPORT: awsSupportMap.forEach((key, asyncClient) -> asyncClient.shutdown()); break;
-        }
-
-
+    public void shutdown() {
+        awsTrustedMap.forEach((key, asyncClient) -> asyncClient.shutdown());
+        awsHealthMap.forEach((key, asyncClient) -> asyncClient.shutdown());
+        awsSupportMap.forEach((key, asyncClient) -> asyncClient.shutdown());
     }
 
     private class TrustedAdvisorChecksResultHandler implements AsyncHandler<DescribeTrustedAdvisorChecksRequest, DescribeTrustedAdvisorChecksResult> {
@@ -228,7 +224,7 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
                         });
     }
 
-    private void describeCases(String profile, String nextToken, final SupportCases cases, final CompletableFuture<SupportCases> future) {
+    private void describeCases(String profile, String nextToken, final ProfileSupportCases cases, final CompletableFuture<ProfileSupportCases> future) {
         awsSupportMap.get(profile)
                 .describeCasesAsync(new DescribeCasesRequest()
                                 .withIncludeResolvedCases(true)
@@ -243,13 +239,7 @@ public class TrustedOverlordServiceImpl implements TrustedOverlordService {
                             @Override
                             public void onSuccess(DescribeCasesRequest request, DescribeCasesResult describeCasesResult) {
                                 describeCasesResult.getCases().forEach(caseDetails -> {
-                                    if ("resolved".equalsIgnoreCase(caseDetails.getStatus())){
-                                        cases.addResolvedCase(
-                                                caseDetails.getCaseId(), caseDetails.getTimeCreated(),
-                                                caseDetails.getStatus(), caseDetails.getSubmittedBy(), caseDetails.getSubject()
-                                        );
-                                    }
-                                    else {
+                                    if (!"resolved".equalsIgnoreCase(caseDetails.getStatus())){
                                         cases.addOpenCase(
                                                 caseDetails.getCaseId(), caseDetails.getTimeCreated(),
                                                 caseDetails.getStatus(), caseDetails.getSubmittedBy(), caseDetails.getSubject()
