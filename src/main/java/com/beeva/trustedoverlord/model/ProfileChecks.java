@@ -11,10 +11,12 @@ public class ProfileChecks {
 
     private List<String> errors;
     private List<String> warnings;
+    private List<Exception> exceptions;
 
     public ProfileChecks() {
         this.errors = Collections.synchronizedList(new ArrayList<>());
         this.warnings = Collections.synchronizedList(new ArrayList<>());
+        this.exceptions = Collections.synchronizedList(new ArrayList<>());
     }
 
     public List<String> getErrors() {
@@ -25,12 +27,20 @@ public class ProfileChecks {
         return warnings;
     }
 
+    public List<Exception> getExceptions() {
+        return exceptions;
+    }
+
     public void addError(String error) {
         this.errors.add(error);
     }
 
     public void addWarning(String warning) {
         this.warnings.add(warning);
+    }
+
+    public void addException(Exception exception) {
+        this.exceptions.add(exception);
     }
 
 }

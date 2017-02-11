@@ -5,24 +5,21 @@ import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
 import com.beeva.trustedoverlord.model.ProfileSupportCases;
-import com.beeva.trustedoverlord.service.TrustedOverlordService;
-import com.beeva.trustedoverlord.service.impl.TrustedOverlordServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ExecutionException;
 
 /**
+ *
  * Created by cesarsilgo on 1/02/17.
  */
-public class TrustedOverlord {
+public class TrustedOverlordMain {
 
-    private static Logger logger = LogManager.getLogger(TrustedOverlord.class);
+    private static Logger logger = LogManager.getLogger(TrustedOverlordMain.class);
     private static Logger banner = LogManager.getLogger("com.beeva.trustedoverlord.Banner");
 
     public static void main(String args[]) {
-
-        TrustedOverlordService trustedOverlordService = new TrustedOverlordServiceImpl(args);
 
         int totalNumWarnings = 0;
         int totalNumErrors = 0;
@@ -50,7 +47,13 @@ public class TrustedOverlord {
             banner.info("=====================================================================");
 
             try {
-                ProfileHealth profileHealth = trustedOverlordService.getProfileHealth(profile).get();
+                ProfileHealth profileHealth =
+                        TrustedOverseer.healthOverlord()
+                            .mutateWithProfile(profile)
+                                .autoshutdown()
+                                .getProfileHealth()
+                                .get();
+
                 logger.info(" # Open Issues: {}", profileHealth.getOpenIssues().size());
                 logger.info(" # Schedules Changes: {}", profileHealth.getScheduledChanges().size());
                 logger.info(" # Other Notifications: {}", profileHealth.getOtherNotifications().size());
@@ -82,7 +85,13 @@ public class TrustedOverlord {
             banner.info("Checking Trusted Advisor for profile '{}'", profile);
             banner.info("=====================================================================");
             try {
-                ProfileChecks profileChecks = trustedOverlordService.getProfileChecks(profile).get();
+                ProfileChecks profileChecks =
+                        TrustedOverseer.trustedAdvisorOverlord()
+                            .mutateWithProfile(profile)
+                                .autoshutdown()
+                                .getProfileChecks()
+                                .get();
+
                 logger.info(" # Errors: {}", profileChecks.getErrors().size());
                 logger.info(" # Warnings: {}", profileChecks.getWarnings().size());
                 logger.info("");
@@ -109,7 +118,12 @@ public class TrustedOverlord {
             banner.info("=====================================================================");
 
             try {
-                ProfileSupportCases profileSupportCases = trustedOverlordService.getSupportCases(profile).get();
+                ProfileSupportCases profileSupportCases =
+                        TrustedOverseer.supportOverlord()
+                            .mutateWithProfile(profile)
+                                .autoshutdown()
+                                .getSupportCases()
+                                .get();
                 logger.info(" # Open Cases: {}", profileSupportCases.getOpenCases().size());
                 logger.info("");
 
@@ -129,17 +143,18 @@ public class TrustedOverlord {
         banner.info("");
         banner.info("");
         banner.info("**************************************************************************");
-        banner.info("TOTAL OPEN ISSUES: {}", totalNumOpenIssues);
-        banner.info("TOTAL SCHEDULED CHANGES: {}", totalNumSchedulesChanges);
-        banner.info("TOTAL OTHER NOTIFICATIONS : {}", totalNumOtherNotifications);
-        banner.info("TOTAL ERRORS: {}", totalNumErrors);
-        banner.info("TOTAL WARNINGS: {}", totalNumWarnings);
-        banner.info("TOTAL OPEN CASES: {}", totalOpenCases);
+        banner.info("HEALTH:");
+        banner.info("  Total Open Issues: {}", totalNumOpenIssues);
+        banner.info("  Scheduled Changes: {}", totalNumSchedulesChanges);
+        banner.info("  Other Notifications: {}", totalNumOtherNotifications);
+        banner.info("");
+        banner.info("TRUSTED ADVISOR:");
+        banner.info("  Total Errors: {}", totalNumErrors);
+        banner.info("  Total Warnings: {}", totalNumWarnings);
+        banner.info("");
+        banner.info("SUPPORT:");
+        banner.info("  Total Open Cases: {}", totalOpenCases);
         banner.info("**************************************************************************");
-
-        // Closing clients
-        trustedOverlordService.shutdown();
-
 
     }
 
