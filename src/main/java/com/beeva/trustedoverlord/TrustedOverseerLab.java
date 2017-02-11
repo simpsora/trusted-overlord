@@ -7,7 +7,7 @@ import com.beeva.trustedoverlord.overlords.TrustedAdvisorOverlord;
 /**
  * First class for the Fluent API
  */
-public class TrustedOverseer {
+public class TrustedOverseerLab {
 
     public static TrustedAdvisorOverlord trustedAdvisorOverlord(){
         return new TrustedAdvisorOverlord();

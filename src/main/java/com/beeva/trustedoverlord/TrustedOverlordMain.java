@@ -48,7 +48,7 @@ public class TrustedOverlordMain {
 
             try {
                 ProfileHealth profileHealth =
-                        TrustedOverseer.healthOverlord()
+                        TrustedOverseerLab.healthOverlord()
                             .mutateWithProfile(profile)
                                 .autoshutdown()
                                 .getProfileHealth()
@@ -86,7 +86,7 @@ public class TrustedOverlordMain {
             banner.info("=====================================================================");
             try {
                 ProfileChecks profileChecks =
-                        TrustedOverseer.trustedAdvisorOverlord()
+                        TrustedOverseerLab.trustedAdvisorOverlord()
                             .mutateWithProfile(profile)
                                 .autoshutdown()
                                 .getProfileChecks()
@@ -119,7 +119,7 @@ public class TrustedOverlordMain {
 
             try {
                 ProfileSupportCases profileSupportCases =
-                        TrustedOverseer.supportOverlord()
+                        TrustedOverseerLab.supportOverlord()
                             .mutateWithProfile(profile)
                                 .autoshutdown()
                                 .getSupportCases()
