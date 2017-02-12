@@ -9,7 +9,7 @@
         </Console>
 	</Appenders>
 	<Loggers>
-        <Logger name="com.beeva.trustedoverlord.Banner" level="INFO" additivity="false">
+        <Logger name="com.beeva.trustedoverlord.utils.BannerLogger" level="INFO" additivity="false">
             <AppenderRef ref="Banners"/>
         </Logger>
 		<Root level="info">

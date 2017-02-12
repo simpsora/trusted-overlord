@@ -5,6 +5,7 @@ import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
 import com.beeva.trustedoverlord.model.ProfileSupportCases;
+import com.beeva.trustedoverlord.utils.BannerLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 public class TrustedOverlordMain {
 
     private static Logger logger = LogManager.getLogger(TrustedOverlordMain.class);
-    private static Logger banner = LogManager.getLogger("com.beeva.trustedoverlord.Banner");
+    private static Logger banner = BannerLogger.getLogger();
 
     public static void main(String args[]) {
 
