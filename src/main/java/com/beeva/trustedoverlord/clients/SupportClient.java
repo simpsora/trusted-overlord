@@ -1,4 +1,4 @@
-package com.beeva.trustedoverlord.overseers;
+package com.beeva.trustedoverlord.clients;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.handlers.AsyncHandler;
@@ -6,24 +6,20 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.support.AWSSupportAsync;
 import com.amazonaws.services.support.AWSSupportAsyncClientBuilder;
 import com.amazonaws.services.support.model.*;
-import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileSupportCases;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.*;
 
 /**
  * Created by Beeva
  */
-public class SupportOverseer implements Overseer{
+public class SupportClient implements Client {
 
     private AWSSupportAsync client;
     private boolean autoshutdown = false;
 
 
-    public SupportOverseer(String profile) {
+    public SupportClient(String profile) {
         this(AWSSupportAsyncClientBuilder
                 .standard()
                     .withCredentials(new ProfileCredentialsProvider(profile))
@@ -31,7 +27,7 @@ public class SupportOverseer implements Overseer{
                 .build());
     }
 
-    private SupportOverseer(AWSSupportAsync client){
+    private SupportClient(AWSSupportAsync client){
         this.client = client;
     }
 
@@ -45,16 +41,16 @@ public class SupportOverseer implements Overseer{
 
     }
 
-    public static SupportOverseer withClient(AWSSupportAsync client) {
+    public static SupportClient withClient(AWSSupportAsync client) {
         if (client == null){
-            return new SupportOverseer(
+            return new SupportClient(
                             AWSSupportAsyncClientBuilder.standard()
                                 .withRegion(Regions.US_EAST_1.getName())
                                 .build()
                         );
         }
         else {
-            return new SupportOverseer(client);
+            return new SupportClient(client);
         }
     }
 
@@ -65,7 +61,7 @@ public class SupportOverseer implements Overseer{
 
     @Override
     @SuppressWarnings("unchecked")
-    public SupportOverseer autoshutdown() {
+    public SupportClient autoshutdown() {
         this.autoshutdown = true;
         return this;
     }

@@ -1,4 +1,4 @@
-package com.beeva.trustedoverlord.overseers;
+package com.beeva.trustedoverlord.clients;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.handlers.AsyncHandler;
@@ -19,13 +19,13 @@ import java.util.concurrent.*;
 /**
  * Created by Beeva
  */
-public class TrustedAdvisorOverseer implements Overseer{
+public class TrustedAdvisorClient implements Client {
 
     private AWSSupportAsync client;
     private boolean autoshutdown = false;
 
 
-    public TrustedAdvisorOverseer(String profile) {
+    public TrustedAdvisorClient(String profile) {
         this(AWSSupportAsyncClientBuilder
                 .standard()
                     .withCredentials(new ProfileCredentialsProvider(profile))
@@ -33,7 +33,7 @@ public class TrustedAdvisorOverseer implements Overseer{
                 .build());
     }
 
-    private TrustedAdvisorOverseer(AWSSupportAsync client){
+    private TrustedAdvisorClient(AWSSupportAsync client){
         this.client = client;
     }
 
@@ -53,16 +53,16 @@ public class TrustedAdvisorOverseer implements Overseer{
 
     }
 
-    public static TrustedAdvisorOverseer withClient(AWSSupportAsync client) {
+    public static TrustedAdvisorClient withClient(AWSSupportAsync client) {
         if (client == null){
-            return new TrustedAdvisorOverseer(
+            return new TrustedAdvisorClient(
                             AWSSupportAsyncClientBuilder.standard()
                                 .withRegion(Regions.US_EAST_1.getName())
                                 .build()
                         );
         }
         else {
-            return new TrustedAdvisorOverseer(client);
+            return new TrustedAdvisorClient(client);
         }
     }
 
@@ -73,7 +73,7 @@ public class TrustedAdvisorOverseer implements Overseer{
 
     @Override
     @SuppressWarnings("unchecked")
-    public TrustedAdvisorOverseer autoshutdown() {
+    public TrustedAdvisorClient autoshutdown() {
         this.autoshutdown = true;
         return this;
     }

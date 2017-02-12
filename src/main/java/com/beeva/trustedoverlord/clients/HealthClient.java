@@ -1,4 +1,4 @@
-package com.beeva.trustedoverlord.overseers;
+package com.beeva.trustedoverlord.clients;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.handlers.AsyncHandler;
@@ -14,13 +14,13 @@ import java.util.concurrent.Future;
 /**
  * Created by Beeva
  */
-public class HealthOverseer implements Overseer{
+public class HealthClient implements Client {
 
     private AWSHealthAsync client;
     private boolean autoshutdown = false;
 
 
-    public HealthOverseer(String profile) {
+    public HealthClient(String profile) {
         this(AWSHealthAsyncClientBuilder
                 .standard()
                     .withCredentials(new ProfileCredentialsProvider(profile))
@@ -28,7 +28,7 @@ public class HealthOverseer implements Overseer{
                 .build());
     }
 
-    private HealthOverseer(AWSHealthAsync client){
+    private HealthClient(AWSHealthAsync client){
         this.client = client;
     }
 
@@ -43,16 +43,16 @@ public class HealthOverseer implements Overseer{
 
     }
 
-    public static HealthOverseer withClient(AWSHealthAsync client) {
+    public static HealthClient withClient(AWSHealthAsync client) {
         if (client == null){
-            return new HealthOverseer(
+            return new HealthClient(
                         AWSHealthAsyncClientBuilder.standard()
                                 .withRegion(Regions.US_EAST_1.getName())
                                 .build()
                         );
         }
         else {
-            return new HealthOverseer(client);
+            return new HealthClient(client);
         }
     }
 
@@ -63,7 +63,7 @@ public class HealthOverseer implements Overseer{
 
     @Override
     @SuppressWarnings("unchecked")
-    public HealthOverseer autoshutdown() {
+    public HealthClient autoshutdown() {
         this.autoshutdown = true;
         return this;
     }
