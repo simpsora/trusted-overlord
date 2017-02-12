@@ -73,7 +73,7 @@ public class SupportOverseer implements Overseer{
     private void describeCases(String nextToken, final ProfileSupportCases cases, final CompletableFuture<ProfileSupportCases> future) {
         this.client
                 .describeCasesAsync(new DescribeCasesRequest()
-                                .withIncludeResolvedCases(true)
+                                .withIncludeResolvedCases(false)
                                 .withIncludeCommunications(false)
                                 .withNextToken(nextToken),
                         new AsyncHandler<DescribeCasesRequest, DescribeCasesResult>() {
@@ -88,12 +88,10 @@ public class SupportOverseer implements Overseer{
                             @Override
                             public void onSuccess(DescribeCasesRequest request, DescribeCasesResult describeCasesResult) {
                                 describeCasesResult.getCases().forEach(caseDetails -> {
-                                    if (!"resolved".equalsIgnoreCase(caseDetails.getStatus())){
-                                        cases.addOpenCase(
-                                                caseDetails.getCaseId(), caseDetails.getTimeCreated(),
-                                                caseDetails.getStatus(), caseDetails.getSubmittedBy(), caseDetails.getSubject()
-                                        );
-                                    }
+                                    cases.addOpenCase(
+                                            caseDetails.getCaseId(), caseDetails.getTimeCreated(),
+                                            caseDetails.getStatus(), caseDetails.getSubmittedBy(), caseDetails.getSubject()
+                                    );
                                 });
 
                                 String returnedNextToken = describeCasesResult.getNextToken();
