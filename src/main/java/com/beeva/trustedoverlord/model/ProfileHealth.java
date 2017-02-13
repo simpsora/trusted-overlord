@@ -43,4 +43,17 @@ public class ProfileHealth {
         this.otherNotifications.add(otherNotifications);
     }
 
+    public String toMarkdown() {
+
+        StringBuffer result = new StringBuffer("### Health Dashboard\n");
+        openIssues.stream().forEach(openIssue ->
+                result.append("* __Open Issue:__").append(openIssue).append("\n"));
+        scheduledChanges.stream().forEach(scheduledChange ->
+                result.append("* __Scheduled Change:__").append(scheduledChange).append("\n"));
+        otherNotifications.stream().forEach(otherNotification ->
+                result.append("* __Other Notification:__").append(otherNotification).append("\n"));
+        return result.toString();
+
+    }
+
 }

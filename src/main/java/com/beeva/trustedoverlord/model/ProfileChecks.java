@@ -43,4 +43,14 @@ public class ProfileChecks {
         this.exceptions.add(exception);
     }
 
+    public String toMarkdown() {
+
+        StringBuffer result = new StringBuffer("### Trusted Advisor\n");
+        errors.stream().forEach(error -> result.append("* __Error:__").append(error).append("\n"));
+        warnings.stream().forEach(warning -> result.append("* __Warning:__").append(warning).append("\n"));
+        exceptions.stream().forEach(exception -> result.append("* __Exception:__").append(exception).append("\n"));
+        return result.toString();
+
+    }
+
 }
