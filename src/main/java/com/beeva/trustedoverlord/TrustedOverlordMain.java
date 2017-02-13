@@ -2,6 +2,7 @@ package com.beeva.trustedoverlord;
 
 import com.amazonaws.services.health.model.AWSHealthException;
 import com.amazonaws.services.support.model.AWSSupportException;
+import com.beeva.trustedoverlord.model.Profile;
 import com.beeva.trustedoverlord.model.ProfileChecks;
 import com.beeva.trustedoverlord.model.ProfileHealth;
 import com.beeva.trustedoverlord.model.ProfileSupportCases;
@@ -40,103 +41,72 @@ public class TrustedOverlordMain {
         banner.info("");
         logger.info("...will now check {} AWS accounts. ", args.length);
 
-        for(String profile : args) {
+        for(String profileName : args) {
+
+            Profile profile = new Profile(profileName);
 
             banner.info("");
             banner.info("=====================================================================");
-            banner.info("Checking Health for profile '{}'", profile);
+            banner.info("Checking Health for profile '{}'", profile.getProfileName());
             banner.info("=====================================================================");
+            if(profile.getProfileHealth()!=null) {
 
-            try {
-                ProfileHealth profileHealth =
-                        TrustedOverlordClientFactory.healthApi()
-                            .clientWithProfile(profile)
-                                .autoshutdown()
-                                .getProfileHealth()
-                                .get();
-
-                logger.info(" # Open Issues: {}", profileHealth.getOpenIssues().size());
-                logger.info(" # Schedules Changes: {}", profileHealth.getScheduledChanges().size());
-                logger.info(" # Other Notifications: {}", profileHealth.getOtherNotifications().size());
+                logger.info(" # Open Issues: {}", profile.getProfileHealth().getOpenIssues().size());
+                logger.info(" # Schedules Changes: {}", profile.getProfileHealth().getScheduledChanges().size());
+                logger.info(" # Other Notifications: {}", profile.getProfileHealth().getOtherNotifications().size());
                 logger.info("");
 
-                for(String openIssue : profileHealth.getOpenIssues()) {
+                for (String openIssue : profile.getProfileHealth().getOpenIssues()) {
                     logger.error(" + Open Issue: {}", openIssue);
                 }
-                totalNumOpenIssues += profileHealth.getOpenIssues().size();
+                totalNumOpenIssues += profile.getProfileHealth().getOpenIssues().size();
 
-                for(String scheduledChange : profileHealth.getScheduledChanges()) {
+                for (String scheduledChange : profile.getProfileHealth().getScheduledChanges()) {
                     logger.warn(" + Scheduled Change: {}", scheduledChange);
                 }
-                totalNumSchedulesChanges += profileHealth.getScheduledChanges().size();
+                totalNumSchedulesChanges += profile.getProfileHealth().getScheduledChanges().size();
 
-                for(String otherNotification : profileHealth.getOtherNotifications()) {
+                for (String otherNotification : profile.getProfileHealth().getOtherNotifications()) {
                     logger.info(" + Other Notification: {}", otherNotification);
                 }
-                totalNumOtherNotifications += profileHealth.getOtherNotifications().size();
-
-            } catch (AWSHealthException ex) {
-                logger.error("UNAUTHORIZED AWS Health", ex);
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error(e);
+                totalNumOtherNotifications += profile.getProfileHealth().getOtherNotifications().size();
             }
 
             banner.info("");
             banner.info("=====================================================================");
-            banner.info("Checking Trusted Advisor for profile '{}'", profile);
+            banner.info("Checking Trusted Advisor for profile '{}'", profile.getProfileName());
             banner.info("=====================================================================");
-            try {
-                ProfileChecks profileChecks =
-                        TrustedOverlordClientFactory.trustedAdvisorApi()
-                            .clientWithProfile(profile)
-                                .autoshutdown()
-                                .getProfileChecks()
-                                .get();
+            if(profile.getProfileChecks()!=null) {
 
-                logger.info(" # Errors: {}", profileChecks.getErrors().size());
-                logger.info(" # Warnings: {}", profileChecks.getWarnings().size());
+                logger.info(" # Errors: {}", profile.getProfileChecks().getErrors().size());
+                logger.info(" # Warnings: {}", profile.getProfileChecks().getWarnings().size());
                 logger.info("");
 
-                for(String error : profileChecks.getErrors()) {
+                for (String error : profile.getProfileChecks().getErrors()) {
                     logger.error(" + Error: {}", error);
                 }
-                totalNumErrors += profileChecks.getErrors().size();
+                totalNumErrors += profile.getProfileChecks().getErrors().size();
 
-                for(String error : profileChecks.getWarnings()) {
+                for (String error : profile.getProfileChecks().getWarnings()) {
                     logger.warn(" + Warning: {}", error);
                 }
-                totalNumWarnings += profileChecks.getWarnings().size();
-
-            } catch (AWSSupportException ex) {
-                logger.error("UNAUTHORIZED AWS Trusted Advisor", ex);
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error(e);
+                totalNumWarnings += profile.getProfileChecks().getWarnings().size();
             }
 
             banner.info("");
             banner.info("=====================================================================");
-            banner.info("Checking AWS Support Cases for profile '{}'", profile);
+            banner.info("Checking AWS Support Cases for profile '{}'", profile.getProfileName());
             banner.info("=====================================================================");
 
-            try {
-                ProfileSupportCases profileSupportCases =
-                        TrustedOverlordClientFactory.supportApi()
-                            .clientWithProfile(profile)
-                                .autoshutdown()
-                                .getSupportCases()
-                                .get();
-                logger.info(" # Open Cases: {}", profileSupportCases.getOpenCases().size());
+            if(profile.getProfileSupportCases()!=null) {
+
+                logger.info(" # Open Cases: {}", profile.getProfileSupportCases().getOpenCases().size());
                 logger.info("");
 
-                for (ProfileSupportCases.Case caseDetail : profileSupportCases.getOpenCases()){
+                for (ProfileSupportCases.Case caseDetail : profile.getProfileSupportCases().getOpenCases()) {
                     logger.warn(" + Open Case: {}", caseDetail);
                 }
-                totalOpenCases += profileSupportCases.getOpenCases().size();
-
-            } catch (AWSSupportException ex) {
-                logger.error("UNAUTHORIZED AWS Support", ex);
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error(e);
+                totalOpenCases += profile.getProfileSupportCases().getOpenCases().size();
             }
 
         }
