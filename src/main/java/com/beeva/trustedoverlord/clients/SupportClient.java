@@ -7,6 +7,8 @@ import com.amazonaws.services.support.AWSSupportAsync;
 import com.amazonaws.services.support.AWSSupportAsyncClientBuilder;
 import com.amazonaws.services.support.model.*;
 import com.beeva.trustedoverlord.model.ProfileSupportCases;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.*;
 
@@ -17,6 +19,8 @@ public class SupportClient implements Client {
 
     private AWSSupportAsync client;
     private boolean autoshutdown = false;
+    private static Logger logger = LogManager.getLogger(SupportClient.class);
+
 
 
     public SupportClient(String profile) {
@@ -84,6 +88,7 @@ public class SupportClient implements Client {
                             @Override
                             public void onSuccess(DescribeCasesRequest request, DescribeCasesResult describeCasesResult) {
                                 describeCasesResult.getCases().forEach(caseDetails -> {
+                                    logger.debug(caseDetails.toString());
                                     cases.addOpenCase(
                                             caseDetails.getCaseId(), caseDetails.getTimeCreated(),
                                             caseDetails.getStatus(), caseDetails.getSubmittedBy(), caseDetails.getSubject()

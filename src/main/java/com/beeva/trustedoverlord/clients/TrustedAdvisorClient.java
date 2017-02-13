@@ -10,6 +10,8 @@ import com.amazonaws.services.support.model.DescribeTrustedAdvisorCheckResultRes
 import com.amazonaws.services.support.model.DescribeTrustedAdvisorChecksRequest;
 import com.amazonaws.services.support.model.DescribeTrustedAdvisorChecksResult;
 import com.beeva.trustedoverlord.model.ProfileChecks;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,8 @@ public class TrustedAdvisorClient implements Client {
 
     private AWSSupportAsync client;
     private boolean autoshutdown = false;
+    private static Logger logger = LogManager.getLogger(TrustedAdvisorClient.class);
+
 
 
     public TrustedAdvisorClient(String profile) {
@@ -116,10 +120,11 @@ public class TrustedAdvisorClient implements Client {
                                     @Override
                                     public void onSuccess(DescribeTrustedAdvisorCheckResultRequest request,
                                                           DescribeTrustedAdvisorCheckResultResult describeTrustedAdvisorCheckResult) {
-
                                         if ("error".equals(describeTrustedAdvisorCheckResult.getResult().getStatus())) {
+                                            logger.debug(describeTrustedAdvisorCheckResult.toString());
                                             profileChecks.addError(checkDescription.getName());
                                         } else if ("warning".equals(describeTrustedAdvisorCheckResult.getResult().getStatus())) {
+                                            logger.debug(describeTrustedAdvisorCheckResult.toString());
                                             profileChecks.addWarning(checkDescription.getName());
                                         }
                                     }

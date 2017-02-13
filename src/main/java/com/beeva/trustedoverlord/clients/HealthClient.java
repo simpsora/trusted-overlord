@@ -7,6 +7,8 @@ import com.amazonaws.services.health.AWSHealthAsync;
 import com.amazonaws.services.health.AWSHealthAsyncClientBuilder;
 import com.amazonaws.services.health.model.*;
 import com.beeva.trustedoverlord.model.ProfileHealth;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -18,6 +20,8 @@ public class HealthClient implements Client {
 
     private AWSHealthAsync client;
     private boolean autoshutdown = false;
+    private static Logger logger = LogManager.getLogger(HealthClient.class);
+
 
 
     public HealthClient(String profile) {
@@ -86,6 +90,7 @@ public class HealthClient implements Client {
                             @Override
                             public void onSuccess(DescribeEventsRequest request, DescribeEventsResult describeEventsResult) {
                                 for (Event event : describeEventsResult.getEvents()) {
+                                    logger.debug(event.toString());
                                     // TODO: Blame AWS for not using the same type for both values
                                     if (event.getEventTypeCategory().equals(EventTypeCategory.Issue.toString())) {
                                         profileHealth.addOpenIssue(event.getEventTypeCode());
