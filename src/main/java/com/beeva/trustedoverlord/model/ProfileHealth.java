@@ -9,15 +9,9 @@ import java.util.List;
  */
 public class ProfileHealth {
 
-    private List<String> openIssues;
-    private List<String> scheduledChanges;
-    private List<String> otherNotifications;
-
-    public ProfileHealth() {
-        openIssues = Collections.synchronizedList(new ArrayList<>());
-        scheduledChanges = Collections.synchronizedList(new ArrayList<>());
-        otherNotifications = Collections.synchronizedList(new ArrayList<>());
-    }
+    private List<String> openIssues = Collections.synchronizedList(new ArrayList<>());
+    private List<String> scheduledChanges = Collections.synchronizedList(new ArrayList<>());
+    private List<String> otherNotifications = Collections.synchronizedList(new ArrayList<>());
 
     public List<String> getOpenIssues() {
         return openIssues;
@@ -41,6 +35,19 @@ public class ProfileHealth {
 
     public void addOtherNotifications(final String otherNotifications) {
         this.otherNotifications.add(otherNotifications);
+    }
+
+    public String toMarkdown() {
+
+        StringBuffer result = new StringBuffer("#### __Health Dashboard__\n");
+        openIssues.stream().forEach(openIssue ->
+                result.append("* __Open Issue:__ ").append(openIssue).append("\n"));
+        scheduledChanges.stream().forEach(scheduledChange ->
+                result.append("* __Scheduled Change:__ ").append(scheduledChange).append("\n"));
+        otherNotifications.stream().forEach(otherNotification ->
+                result.append("* __Other Notification:__ ").append(otherNotification).append("\n"));
+        return result.toString();
+
     }
 
 }
