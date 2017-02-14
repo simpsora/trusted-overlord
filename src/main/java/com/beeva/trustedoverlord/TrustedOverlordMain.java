@@ -1,20 +1,22 @@
 package com.beeva.trustedoverlord;
 
-import com.amazonaws.services.health.model.AWSHealthException;
-import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.Profile;
-import com.beeva.trustedoverlord.model.ProfileChecks;
-import com.beeva.trustedoverlord.model.ProfileHealth;
+import com.beeva.trustedoverlord.model.ProfileList;
 import com.beeva.trustedoverlord.model.ProfileSupportCases;
 import com.beeva.trustedoverlord.utils.BannerLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.ExecutionException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 /**
- *
- * Created by cesarsilgo on 1/02/17.
+ * Created by BEEVA
  */
 public class TrustedOverlordMain {
 
@@ -23,12 +25,11 @@ public class TrustedOverlordMain {
 
     public static void main(String args[]) {
 
-        int totalNumWarnings = 0;
-        int totalNumErrors = 0;
-        int totalNumOpenIssues = 0;
-        int totalNumSchedulesChanges = 0;
-        int totalNumOtherNotifications = 0;
-        int totalOpenCases = 0;
+        if (args.length < 1) {
+            logger.error("Invalid number of arguments please provide at least one AWS profile name");
+            return;
+        }
+
 
         banner.info(" _____              _           _   _____                _               _");
         banner.info("|_   _|            | |         | | |  _  |              | |             | |");
@@ -37,20 +38,19 @@ public class TrustedOverlordMain {
         banner.info("  | | |  | |_| \\__ \\ ||  __/ (_| | \\ \\_/ /\\ V /  __/ |  | | (_) | |  |(_| |");
         banner.info("  \\_/_|   \\__,_|___/\\__\\___|\\__,_|  \\___/  \\_/ \\___|_|  |_|\\___/|_|  \\__,_|");
         banner.info("");
-
         banner.info("");
         logger.info("...will now check {} AWS accounts. ", args.length);
 
-        for(String profileName : args) {
+        ProfileList profileList = new ProfileList(Arrays.asList(args));
 
-            Profile profile = new Profile(profileName);
+        for (Profile profile : profileList.getProfiles()) {
 
             banner.info("");
             banner.info("=====================================================================");
             banner.info("Checking Health for profile '{}'", profile.getProfileName());
             banner.info("=====================================================================");
-            if(profile.getProfileHealth()!=null) {
 
+            if (profile.getProfileHealth() != null) {
                 logger.info(" # Open Issues: {}", profile.getProfileHealth().getOpenIssues().size());
                 logger.info(" # Schedules Changes: {}", profile.getProfileHealth().getScheduledChanges().size());
                 logger.info(" # Other Notifications: {}", profile.getProfileHealth().getOtherNotifications().size());
@@ -59,24 +59,19 @@ public class TrustedOverlordMain {
                 for (String openIssue : profile.getProfileHealth().getOpenIssues()) {
                     logger.error(" + Open Issue: {}", openIssue);
                 }
-                totalNumOpenIssues += profile.getProfileHealth().getOpenIssues().size();
-
                 for (String scheduledChange : profile.getProfileHealth().getScheduledChanges()) {
                     logger.warn(" + Scheduled Change: {}", scheduledChange);
                 }
-                totalNumSchedulesChanges += profile.getProfileHealth().getScheduledChanges().size();
-
                 for (String otherNotification : profile.getProfileHealth().getOtherNotifications()) {
                     logger.info(" + Other Notification: {}", otherNotification);
                 }
-                totalNumOtherNotifications += profile.getProfileHealth().getOtherNotifications().size();
             }
 
             banner.info("");
             banner.info("=====================================================================");
             banner.info("Checking Trusted Advisor for profile '{}'", profile.getProfileName());
             banner.info("=====================================================================");
-            if(profile.getProfileChecks()!=null) {
+            if (profile.getProfileChecks() != null) {
 
                 logger.info(" # Errors: {}", profile.getProfileChecks().getErrors().size());
                 logger.info(" # Warnings: {}", profile.getProfileChecks().getWarnings().size());
@@ -85,12 +80,10 @@ public class TrustedOverlordMain {
                 for (String error : profile.getProfileChecks().getErrors()) {
                     logger.error(" + Error: {}", error);
                 }
-                totalNumErrors += profile.getProfileChecks().getErrors().size();
 
                 for (String error : profile.getProfileChecks().getWarnings()) {
                     logger.warn(" + Warning: {}", error);
                 }
-                totalNumWarnings += profile.getProfileChecks().getWarnings().size();
             }
 
             banner.info("");
@@ -98,7 +91,7 @@ public class TrustedOverlordMain {
             banner.info("Checking AWS Support Cases for profile '{}'", profile.getProfileName());
             banner.info("=====================================================================");
 
-            if(profile.getProfileSupportCases()!=null) {
+            if (profile.getProfileSupportCases() != null) {
 
                 logger.info(" # Open Cases: {}", profile.getProfileSupportCases().getOpenCases().size());
                 logger.info("");
@@ -106,7 +99,6 @@ public class TrustedOverlordMain {
                 for (ProfileSupportCases.Case caseDetail : profile.getProfileSupportCases().getOpenCases()) {
                     logger.warn(" + Open Case: {}", caseDetail);
                 }
-                totalOpenCases += profile.getProfileSupportCases().getOpenCases().size();
             }
 
         }
@@ -115,17 +107,24 @@ public class TrustedOverlordMain {
         banner.info("");
         banner.info("**************************************************************************");
         banner.info("HEALTH:");
-        banner.info("  Total Open Issues: {}", totalNumOpenIssues);
-        banner.info("  Scheduled Changes: {}", totalNumSchedulesChanges);
-        banner.info("  Other Notifications: {}", totalNumOtherNotifications);
+        banner.info("  Total Open Issues: {}", profileList.getNumOpenIssues());
+        banner.info("  Scheduled Changes: {}", profileList.getNumSchedulesChanges());
+        banner.info("  Other Notifications: {}", profileList.getNumOtherNotifications());
         banner.info("");
         banner.info("TRUSTED ADVISOR:");
-        banner.info("  Total Errors: {}", totalNumErrors);
-        banner.info("  Total Warnings: {}", totalNumWarnings);
+        banner.info("  Total Errors: {}", profileList.getNumErrors());
+        banner.info("  Total Warnings: {}", profileList.getNumWarnings());
         banner.info("");
         banner.info("SUPPORT:");
-        banner.info("  Total Open Cases: {}", totalOpenCases);
+        banner.info("  Total Open Cases: {}", profileList.getNumOpenCases());
         banner.info("**************************************************************************");
+
+        try {
+            Files.write(Paths.get(LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY_MM_dd_hh_mm_ss")) +
+                    "_summary.md"), profileList.toMarkdown().getBytes());
+        } catch (IOException e) {
+            logger.error(e);
+        }
 
     }
 

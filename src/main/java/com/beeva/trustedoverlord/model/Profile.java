@@ -16,9 +16,9 @@ public class Profile {
     private static Logger logger = LogManager.getLogger(Profile.class);
 
     private String profileName;
-    private ProfileChecks profileChecks;
-    private ProfileHealth profileHealth;
-    private ProfileSupportCases profileSupportCases;
+    private ProfileChecks profileChecks = new ProfileChecks();
+    private ProfileHealth profileHealth = new ProfileHealth();
+    private ProfileSupportCases profileSupportCases = new ProfileSupportCases();
 
     public Profile(String profileName) {
 
@@ -66,6 +66,16 @@ public class Profile {
 
     public ProfileSupportCases getProfileSupportCases() {
         return profileSupportCases;
+    }
+
+    public String toMarkdown() {
+
+        return new StringBuffer("## __").append(profileName).append("__\n")
+                .append(profileChecks.toMarkdown())
+                .append(profileHealth.toMarkdown())
+                .append(profileSupportCases.toMarkdown())
+                .append("\n---\n").toString();
+
     }
 
 }
