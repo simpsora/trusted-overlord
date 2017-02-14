@@ -72,6 +72,11 @@ public class HealthClient implements Client {
         return this;
     }
 
+    @Override
+    public boolean isAutoshutdown() {
+        return this.autoshutdown;
+    }
+
     private void describeEventAsync(String nextToken, final ProfileHealth profileHealth, final CompletableFuture<ProfileHealth> future) {
         this.client
                 .describeEventsAsync(new DescribeEventsRequest().withFilter(
