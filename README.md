@@ -82,5 +82,7 @@ Checking Health for profile 'profileName2'
 =====================================================================
 ...
 
+2017-02-08T10:27:47,746 INFO  [main] c.b.t.TrustedOverlordMain: 2017_02_08_10_27_47_summary.md markdown file generated 
+
 ```
 
