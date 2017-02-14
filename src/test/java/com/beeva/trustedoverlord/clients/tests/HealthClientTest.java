@@ -1,5 +1,6 @@
 package com.beeva.trustedoverlord.clients.tests;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.health.AWSHealthAsync;
 import com.amazonaws.services.health.model.DescribeEventsRequest;
@@ -16,10 +17,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -53,7 +55,10 @@ public class HealthClientTest {
         }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
 
         // Calls the method
-        CompletableFuture<ProfileHealth> future = (CompletableFuture<ProfileHealth>)HealthClient.withClient(mockClient).getProfileHealth();
+        HealthClient healthClient = HealthClient.withClient(mockClient);
+        CompletableFuture<ProfileHealth> future = (CompletableFuture<ProfileHealth>) healthClient.getProfileHealth();
+
+        Assert.assertThat(healthClient.isAutoshutdown(), is(false));
 
         // Waits until the future is complete
         Awaitility.await().until(future::isDone);
@@ -63,9 +68,13 @@ public class HealthClientTest {
         Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(false));
 
         verify(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+        verify(mockClient, never()).shutdown();
 
     }
 
+    /**
+     * Verifies that the method is invoked recursively twice to retrieve the whole data
+     */
     @Test
     public void testGetProfileHealthWithToken() throws Exception {
 
@@ -94,6 +103,146 @@ public class HealthClientTest {
         Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(false));
 
         verify(mockClient, times(2)).describeEventsAsync(any(DescribeEventsRequest.class), any());
+        verify(mockClient, never()).shutdown();
+
+    }
+
+    @Test
+    public void testGetProfileHealthAWSEmptyReturnData() throws Exception {
+
+        // Capture the parameters when invoking the method describeEventsAsync
+        doAnswer(invocation -> {
+            DescribeEventsRequest request = invocation.getArgument(0);
+            AsyncHandler<DescribeEventsRequest, DescribeEventsResult> handler = invocation.getArgument(1);
+
+            handler.onSuccess(request, new DescribeEventsResult().withEvents(Collections.emptyList()));
+
+            Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
+
+            return null;
+        }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+
+        // Calls the method
+        CompletableFuture<ProfileHealth> future = (CompletableFuture<ProfileHealth>)HealthClient.withClient(mockClient).getProfileHealth();
+
+        // Waits until the future is complete
+        Awaitility.await().until(future::isDone);
+
+        Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(true));
+        Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(true));
+        Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(true));
+
+        verify(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+        verify(mockClient, never()).shutdown();
+
+    }
+
+    @Test
+    public void testGetProfileHealthThrowException() throws Exception {
+
+        // Capture the parameters when invoking the method describeEventsAsync
+        doAnswer(invocation -> {
+            DescribeEventsRequest request = invocation.getArgument(0);
+            AsyncHandler<DescribeEventsRequest, DescribeEventsResult> handler = invocation.getArgument(1);
+
+            handler.onError(new AmazonClientException("testException"));
+
+            Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
+
+            return null;
+        }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+
+        // Calls the method
+        CompletableFuture<ProfileHealth> future = (CompletableFuture<ProfileHealth>)HealthClient.withClient(mockClient).getProfileHealth();
+
+        // Waits until the future is complete
+        Awaitility.await().until(future::isDone);
+
+        Assert.assertThat(future.isCompletedExceptionally(), is(true));
+
+        verify(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+        verify(mockClient, never()).shutdown();
+
+        try{
+            future.get(); //This should throw an exception
+            Assert.fail();
+        }
+        catch (Exception e){
+            Assert.assertThat(e, instanceOf(ExecutionException.class));
+            Assert.assertThat(e.getCause(), instanceOf(AmazonClientException.class));
+        }
+
+    }
+
+    @Test
+    public void testGetProfileHealthAutoshutdown() throws Exception {
+
+        // Capture the parameters when invoking the method describeEventsAsync
+        doAnswer(invocation -> {
+            DescribeEventsRequest request = invocation.getArgument(0);
+            AsyncHandler<DescribeEventsRequest, DescribeEventsResult> handler = invocation.getArgument(1);
+
+            handler.onSuccess(request, createDescribeEventsResultWithThreeEvents());
+
+            Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
+
+            return null;
+        }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+
+        // Calls the method
+        HealthClient healthClient = HealthClient.withClient(mockClient).autoshutdown();
+        CompletableFuture<ProfileHealth> future = (CompletableFuture<ProfileHealth>) healthClient.getProfileHealth();
+
+        Assert.assertThat(healthClient.isAutoshutdown(), is(true));
+
+        // Waits until the future is complete
+        Awaitility.await().until(future::isDone);
+
+        Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(false));
+        Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(false));
+        Assert.assertThat(future.get().getOpenIssues().isEmpty(), is(false));
+
+        verify(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+        verify(mockClient).shutdown();
+
+    }
+
+
+    @Test
+    public void testGetProfileHealthThrowExceptionAutoshutdown() throws Exception {
+
+        // Capture the parameters when invoking the method describeEventsAsync
+        doAnswer(invocation -> {
+            DescribeEventsRequest request = invocation.getArgument(0);
+            AsyncHandler<DescribeEventsRequest, DescribeEventsResult> handler = invocation.getArgument(1);
+
+            handler.onError(new AmazonClientException("testException"));
+
+            Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
+
+            return null;
+        }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+
+        // Calls the method
+        HealthClient healthClient = HealthClient.withClient(mockClient).autoshutdown();
+        CompletableFuture<ProfileHealth> future = (CompletableFuture<ProfileHealth>) healthClient.getProfileHealth();
+
+        // Waits until the future is complete
+        Awaitility.await().until(future::isDone);
+
+        Assert.assertThat(future.isCompletedExceptionally(), is(true));
+
+        verify(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
+        verify(mockClient).shutdown();
+
+        try{
+            future.get(); //This should throw an exception
+            Assert.fail();
+        }
+        catch (Exception e){
+            Assert.assertThat(e, instanceOf(ExecutionException.class));
+            Assert.assertThat(e.getCause(), instanceOf(AmazonClientException.class));
+        }
 
     }
 
