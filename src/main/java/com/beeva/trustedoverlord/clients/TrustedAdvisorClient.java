@@ -151,6 +151,7 @@ public class TrustedAdvisorClient implements Client {
                 try {
                     future.get(2, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+                    System.err.println(ignored);
                 }
             });
         }
