@@ -120,8 +120,10 @@ public class TrustedOverlordMain {
         banner.info("**************************************************************************");
 
         try {
-            Files.write(Paths.get(LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY_MM_dd_hh_mm_ss")) +
-                    "_summary.md"), profileList.toMarkdown().getBytes());
+            String summaryFileName = LocalDateTime.now().format(DateTimeFormatter
+                    .ofPattern("YYYY_MM_dd_hh_mm_ss")) + "_summary.md";
+            Files.write(Paths.get(summaryFileName), profileList.toMarkdown().getBytes());
+            logger.info(summaryFileName + " markdown file generated ");
         } catch (IOException e) {
             logger.error(e);
         }
