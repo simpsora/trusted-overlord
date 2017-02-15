@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -48,11 +49,12 @@ public class SupportClientTest {
             DescribeCasesRequest request = invocation.getArgument(0);
             AsyncHandler<DescribeCasesRequest, DescribeCasesResult> handler = invocation.getArgument(1);
 
-            handler.onSuccess(request, createCaseDetails());
+            DescribeCasesResult result = createCaseDetails();
+            handler.onSuccess(request, result);
 
             Assert.assertThat(request.getIncludeResolvedCases(), is(false));
 
-            return null;
+            return CompletableFuture.completedFuture(result);
         }).when(mockClient).describeCasesAsync(any(DescribeCasesRequest.class), any());
 
         // Calls the method
@@ -89,7 +91,7 @@ public class SupportClientTest {
 
             Assert.assertThat(request.getIncludeResolvedCases(), is(false));
 
-            return null;
+            return CompletableFuture.completedFuture(describeCasesResult);
         }).when(mockClient).describeCasesAsync(any(DescribeCasesRequest.class), any());
 
         // Calls the method
@@ -118,7 +120,7 @@ public class SupportClientTest {
 
             Assert.assertThat(request.getIncludeResolvedCases(), is(false));
 
-            return null;
+            return CompletableFuture.completedFuture(new DescribeCasesResult().withCases(Collections.emptyList()));
         }).when(mockClient).describeCasesAsync(any(DescribeCasesRequest.class), any());
 
         // Calls the method
@@ -150,7 +152,7 @@ public class SupportClientTest {
 
             Assert.assertThat(request.getIncludeResolvedCases(), is(false));
 
-            return null;
+            return CompletableFuture.completedFuture(null);
         }).when(mockClient).describeCasesAsync(any(DescribeCasesRequest.class), any());
 
         // Calls the method
@@ -186,11 +188,12 @@ public class SupportClientTest {
             DescribeCasesRequest request = invocation.getArgument(0);
             AsyncHandler<DescribeCasesRequest, DescribeCasesResult> handler = invocation.getArgument(1);
 
-            handler.onSuccess(request, createCaseDetails());
+            DescribeCasesResult result = createCaseDetails();
+            handler.onSuccess(request, result);
 
             Assert.assertThat(request.getIncludeResolvedCases(), is(false));
 
-            return null;
+            return CompletableFuture.completedFuture(result);
         }).when(mockClient).describeCasesAsync(any(DescribeCasesRequest.class), any());
 
         // Calls the method
@@ -222,7 +225,7 @@ public class SupportClientTest {
 
             Assert.assertThat(request.getIncludeResolvedCases(), is(false));
 
-            return null;
+            return CompletableFuture.completedFuture(null);
         }).when(mockClient).describeCasesAsync(any(DescribeCasesRequest.class), any());
 
         // Calls the method

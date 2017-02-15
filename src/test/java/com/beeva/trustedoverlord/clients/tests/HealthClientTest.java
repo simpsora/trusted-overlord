@@ -47,11 +47,12 @@ public class HealthClientTest {
             DescribeEventsRequest request = invocation.getArgument(0);
             AsyncHandler<DescribeEventsRequest, DescribeEventsResult> handler = invocation.getArgument(1);
 
-            handler.onSuccess(request, createDescribeEventsResultWithThreeEvents());
+            DescribeEventsResult result = createDescribeEventsResultWithThreeEvents();
+            handler.onSuccess(request, result);
 
             Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
 
-            return null;
+            return CompletableFuture.completedFuture(result);
         }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
 
         // Calls the method
@@ -89,7 +90,7 @@ public class HealthClientTest {
 
             Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
 
-            return null;
+            return CompletableFuture.completedFuture(describeEventsResult);
         }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
 
         // Calls the method
@@ -119,7 +120,7 @@ public class HealthClientTest {
 
             Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
 
-            return null;
+            return CompletableFuture.completedFuture(new DescribeEventsResult().withEvents(Collections.emptyList()));
         }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
 
         // Calls the method
@@ -145,11 +146,12 @@ public class HealthClientTest {
             DescribeEventsRequest request = invocation.getArgument(0);
             AsyncHandler<DescribeEventsRequest, DescribeEventsResult> handler = invocation.getArgument(1);
 
-            handler.onError(new AmazonClientException("testException"));
+            AmazonClientException testException = new AmazonClientException("testException");
+            handler.onError(testException);
 
             Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
 
-            return null;
+            return CompletableFuture.completedFuture(null);
         }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
 
         // Calls the method
@@ -182,11 +184,12 @@ public class HealthClientTest {
             DescribeEventsRequest request = invocation.getArgument(0);
             AsyncHandler<DescribeEventsRequest, DescribeEventsResult> handler = invocation.getArgument(1);
 
-            handler.onSuccess(request, createDescribeEventsResultWithThreeEvents());
+            DescribeEventsResult result = createDescribeEventsResultWithThreeEvents();
+            handler.onSuccess(request, result);
 
             Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
 
-            return null;
+            return CompletableFuture.completedFuture(result);
         }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
 
         // Calls the method
@@ -220,7 +223,7 @@ public class HealthClientTest {
 
             Assert.assertThat(request.getFilter().getEventStatusCodes(), hasItems("open", "upcoming"));
 
-            return null;
+            return CompletableFuture.completedFuture(null);
         }).when(mockClient).describeEventsAsync(any(DescribeEventsRequest.class), any());
 
         // Calls the method
