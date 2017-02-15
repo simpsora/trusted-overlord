@@ -26,7 +26,7 @@ public class ProfileList {
     public ProfileList(List<String> profileNames) {
 
         profiles = new ArrayList<>(profileNames.size());
-        profileNames.stream().forEach(profileName -> {
+        profileNames.forEach(profileName -> {
             try {
                 Profile profile = new Profile(profileName);
                 profiles.add(profile);
@@ -36,9 +36,7 @@ public class ProfileList {
                 numSchedulesChanges += profile.getProfileHealth().getScheduledChanges().size();
                 numOtherNotifications += profile.getProfileHealth().getOtherNotifications().size();
                 numOpenCases += profile.getProfileSupportCases().getOpenCases().size();
-            } catch (AWSSupportException e) {
-                logger.error(e);
-            } catch (AWSHealthException e) {
+            } catch (AWSSupportException | AWSHealthException e) {
                 logger.error(e);
             }
         });
@@ -83,7 +81,7 @@ public class ProfileList {
                 .append("* __Other Notifications__: ").append(numOtherNotifications).append("\n")
                 .append("\n---\n");
 
-        profiles.stream().forEach(profile -> result.append(profile.toMarkdown()));
+        profiles.forEach(profile -> result.append(profile.toMarkdown()));
         return result.toString();
 
     }

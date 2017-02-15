@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by cesarsilgo on 7/02/17.
+ * Created by BEEVA
  */
 public class ProfileHealth {
 
@@ -40,11 +40,11 @@ public class ProfileHealth {
     public String toMarkdown() {
 
         StringBuffer result = new StringBuffer("#### __Health Dashboard__\n");
-        openIssues.stream().forEach(openIssue ->
+        openIssues.forEach(openIssue ->
                 result.append("* __Open Issue:__ ").append(openIssue).append("\n"));
-        scheduledChanges.stream().forEach(scheduledChange ->
+        scheduledChanges.forEach(scheduledChange ->
                 result.append("* __Scheduled Change:__ ").append(scheduledChange).append("\n"));
-        otherNotifications.stream().forEach(otherNotification ->
+        otherNotifications.forEach(otherNotification ->
                 result.append("* __Other Notification:__ ").append(otherNotification).append("\n"));
         return result.toString();
 
