@@ -113,9 +113,9 @@ public class ProfileSupportCases {
     public String toMarkdown() {
 
         StringBuffer result = new StringBuffer("#### __Support Cases__\n");
-        openCases.stream().forEach(openCase ->
+        openCases.forEach(openCase ->
                 result.append("* __Open Case:__ ").append(openCase.toString()).append("\n"));
-        resolvedCases.stream().forEach(resolvedCase ->
+        resolvedCases.forEach(resolvedCase ->
                 result.append("* __Resolved Case:__ ").append(resolvedCase.toString()).append("\n"));
         return result.toString();
 

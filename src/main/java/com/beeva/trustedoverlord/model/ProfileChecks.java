@@ -46,9 +46,9 @@ public class ProfileChecks {
     public String toMarkdown() {
 
         StringBuffer result = new StringBuffer("#### __Trusted Advisor__\n");
-        errors.stream().forEach(error -> result.append("* __Error:__ ").append(error).append("\n"));
-        warnings.stream().forEach(warning -> result.append("* __Warning:__ ").append(warning).append("\n"));
-        exceptions.stream().forEach(exception -> result.append("* __Exception:__ ").append(exception).append("\n"));
+        errors.forEach(error -> result.append("* __Error:__ ").append(error).append("\n"));
+        warnings.forEach(warning -> result.append("* __Warning:__ ").append(warning).append("\n"));
+        exceptions.forEach(exception -> result.append("* __Exception:__ ").append(exception).append("\n"));
         return result.toString();
 
     }

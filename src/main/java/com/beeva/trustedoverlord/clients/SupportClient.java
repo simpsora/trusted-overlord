@@ -70,6 +70,11 @@ public class SupportClient implements Client {
         return this;
     }
 
+    @Override
+    public boolean isAutoshutdown() {
+        return this.autoshutdown;
+    }
+
     private void describeCases(String nextToken, final ProfileSupportCases cases, final CompletableFuture<ProfileSupportCases> future) {
         this.client
                 .describeCasesAsync(new DescribeCasesRequest()

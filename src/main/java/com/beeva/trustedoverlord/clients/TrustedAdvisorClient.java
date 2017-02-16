@@ -82,6 +82,11 @@ public class TrustedAdvisorClient implements Client {
         return this;
     }
 
+    @Override
+    public boolean isAutoshutdown() {
+        return this.autoshutdown;
+    }
+
     private class TrustedAdvisorChecksResultHandler implements AsyncHandler<DescribeTrustedAdvisorChecksRequest, DescribeTrustedAdvisorChecksResult> {
 
         private ProfileChecks profileChecks;
@@ -146,6 +151,7 @@ public class TrustedAdvisorClient implements Client {
                 try {
                     future.get(2, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+                    System.err.println(ignored);
                 }
             });
         }

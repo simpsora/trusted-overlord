@@ -7,5 +7,6 @@ public interface Client {
 
     void shutdown();
     <T extends Client> T autoshutdown();
+    boolean isAutoshutdown();
 
 }
