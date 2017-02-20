@@ -70,10 +70,42 @@ public class Profile {
 
     public String toMarkdown() {
 
+        String pChecks = profileChecks.to(
+                (errors, warnings, exceptions) -> {
+                    StringBuffer result = new StringBuffer();
+                    errors.forEach(error -> result.append("* __Error:__ ").append(error).append("\n"));
+                    warnings.forEach(warning -> result.append("* __Warning:__ ").append(warning).append("\n"));
+                    exceptions.forEach(exception -> result.append("* __Exception:__ ").append(exception).append("\n"));
+                    return result.toString();
+                }
+        );
+
+        String pHealth = profileHealth.to(
+                (openIssues, scheduledChanges, otherNotifications) -> {
+                    StringBuffer result = new StringBuffer();
+                    openIssues.forEach(openIssue -> result.append("* __Open Issue:__ ").append(openIssue).append("\n"));
+                    scheduledChanges.forEach(scheduledChange -> result.append("* __Scheduled Change:__ ").append(scheduledChange).append("\n"));
+                    otherNotifications.forEach(otherNotification -> result.append("* __Other Notification:__ ").append(otherNotification).append("\n"));
+                    return result.toString();
+                }
+        );
+
+        String pSupport = profileSupportCases.to(
+                (openCases, resolvedCases) -> {
+                    StringBuffer result = new StringBuffer();
+                    openCases.forEach(openCase -> result.append("* __Open Case:__ ").append(openCase.toString()).append("\n"));
+                    resolvedCases.forEach(resolvedCase -> result.append("* __Resolved Case:__ ").append(resolvedCase.toString()).append("\n"));
+                    return result.toString();
+                }
+        );
+
         return new StringBuffer("## __").append(profileName).append("__\n")
-                .append(profileChecks.toMarkdown())
-                .append(profileHealth.toMarkdown())
-                .append(profileSupportCases.toMarkdown())
+                .append("#### __Trusted Advisor__\n")
+                .append(pChecks)
+                .append("#### __Health Dashboard__\n")
+                .append(pHealth)
+                .append("#### __Support Cases__\n")
+                .append(pSupport)
                 .append("\n---\n").toString();
 
     }

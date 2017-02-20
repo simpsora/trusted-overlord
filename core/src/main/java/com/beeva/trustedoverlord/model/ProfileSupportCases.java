@@ -110,15 +110,13 @@ public class ProfileSupportCases {
         }
     }
 
-    public String toMarkdown() {
+    public <T> T to(ExportTo<T> func){
+        return func.export(getOpenCases(), getResolvedCases());
+    }
 
-        StringBuffer result = new StringBuffer("#### __Support Cases__\n");
-        openCases.forEach(openCase ->
-                result.append("* __Open Case:__ ").append(openCase.toString()).append("\n"));
-        resolvedCases.forEach(resolvedCase ->
-                result.append("* __Resolved Case:__ ").append(resolvedCase.toString()).append("\n"));
-        return result.toString();
-
+    @FunctionalInterface
+    interface ExportTo<T> {
+        T export(List<Case> openCases, List<Case> resolvedCases);
     }
 
 }

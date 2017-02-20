@@ -37,17 +37,13 @@ public class ProfileHealth {
         this.otherNotifications.add(otherNotifications);
     }
 
-    public String toMarkdown() {
+    public <T> T to(ExportTo<T> func){
+        return func.export(getOpenIssues(), getScheduledChanges(), getOtherNotifications());
+    }
 
-        StringBuffer result = new StringBuffer("#### __Health Dashboard__\n");
-        openIssues.forEach(openIssue ->
-                result.append("* __Open Issue:__ ").append(openIssue).append("\n"));
-        scheduledChanges.forEach(scheduledChange ->
-                result.append("* __Scheduled Change:__ ").append(scheduledChange).append("\n"));
-        otherNotifications.forEach(otherNotification ->
-                result.append("* __Other Notification:__ ").append(otherNotification).append("\n"));
-        return result.toString();
-
+    @FunctionalInterface
+    interface ExportTo<T> {
+        T export(List<String> openIssues, List<String> scheduledChanges, List<String> otherNotifications);
     }
 
 }

@@ -43,14 +43,12 @@ public class ProfileChecks {
         this.exceptions.add(exception);
     }
 
-    public String toMarkdown() {
-
-        StringBuffer result = new StringBuffer("#### __Trusted Advisor__\n");
-        errors.forEach(error -> result.append("* __Error:__ ").append(error).append("\n"));
-        warnings.forEach(warning -> result.append("* __Warning:__ ").append(warning).append("\n"));
-        exceptions.forEach(exception -> result.append("* __Exception:__ ").append(exception).append("\n"));
-        return result.toString();
-
+    public <T> T to(ExportTo<T> func){
+        return func.export(getErrors(), getWarnings(), getExceptions());
     }
 
+    @FunctionalInterface
+    interface ExportTo<T> {
+        T export(List<String> errors, List<String> warnings, List<Exception> exceptions);
+    }
 }
