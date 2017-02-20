@@ -47,40 +47,40 @@ Please note that you must configure permissions using the [standard AWS Credenti
 =====================================================================
 Checking Health for profile 'profileName1'
 =====================================================================
-2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlord:  # Open Issues: 0
-2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlord:  # Schedules Changes: 0
-2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlord:  # Other Notifications: 1
-2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlord:
-2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlord:  + Other Notification: AWS_ECS_OPERATIONAL_NOTIFICATION
+2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlordMain:  # Open Issues: 0
+2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlordMain:  # Schedules Changes: 0
+2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlordMain:  # Other Notifications: 1
+2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlordMain:
+2017-02-08T10:27:36,283 INFO  [main] c.b.t.TrustedOverlordMain:  + Other Notification: AWS_ECS_OPERATIONAL_NOTIFICATION
 
 =====================================================================
 Checking Trusted Advisor for profile 'profileName1'
 =====================================================================
-2017-02-08T10:27:47,737 INFO  [main] c.b.t.TrustedOverlord:  # Errors: 2
-2017-02-08T10:27:47,737 INFO  [main] c.b.t.TrustedOverlord:  # Warnings: 14
-2017-02-08T10:27:47,737 INFO  [main] c.b.t.TrustedOverlord:
-2017-02-08T10:27:47,738 ERROR [main] c.b.t.TrustedOverlord:  + Error: Amazon EBS Snapshots
-2017-02-08T10:27:47,738 ERROR [main] c.b.t.TrustedOverlord:  + Error: Amazon EC2 Availability Zone Balance
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Low Utilization Amazon EC2 Instances
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Underutilized Amazon EBS Volumes
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Unassociated Elastic IP Addresses
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: MFA on Root Account
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: IAM Password Policy
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Load Balancer Optimization
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Service Limits
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Amazon S3 Bucket Logging
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: ELB Listener Security
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: ELB Security Groups
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: ELB Cross-Zone Load Balancing
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: ELB Connection Draining
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: IAM Access Key Rotation
-2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlord:  + Warning: Amazon S3 Bucket Versioning
+2017-02-08T10:27:47,737 INFO  [main] c.b.t.TrustedOverlordMain:  # Errors: 2
+2017-02-08T10:27:47,737 INFO  [main] c.b.t.TrustedOverlordMain:  # Warnings: 14
+2017-02-08T10:27:47,737 INFO  [main] c.b.t.TrustedOverlordMain:
+2017-02-08T10:27:47,738 ERROR [main] c.b.t.TrustedOverlordMain:  + Error: Amazon EBS Snapshots
+2017-02-08T10:27:47,738 ERROR [main] c.b.t.TrustedOverlordMain:  + Error: Amazon EC2 Availability Zone Balance
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: Low Utilization Amazon EC2 Instances
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: Underutilized Amazon EBS Volumes
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: Unassociated Elastic IP Addresses
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: MFA on Root Account
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: IAM Password Policy
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: Load Balancer Optimization
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: Service Limits
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: Amazon S3 Bucket Logging
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: ELB Listener Security
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: ELB Security Groups
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: ELB Cross-Zone Load Balancing
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: ELB Connection Draining
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: IAM Access Key Rotation
+2017-02-08T10:27:47,738 WARN  [main] c.b.t.TrustedOverlordMain:  + Warning: Amazon S3 Bucket Versioning
 
 =====================================================================
 Checking AWS Support Cases for profile 'profileName1'
 =====================================================================
-2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlord:  # Open Cases: 0
-2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlord:
+2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlordMain:  # Open Cases: 0
+2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlordMain:
 
 
 =====================================================================
