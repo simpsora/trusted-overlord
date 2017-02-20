@@ -25,6 +25,11 @@ java -jar trustedoverlord-1.0-SNAPSHOT.jar profileName1 profileName2...
 
 Please note that you must configure permissions using the [standard AWS Credentials management method](https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/)
 
+## Requirements
+
+- Java 8+
+- Maven 3.X+
+
 ## Output
 
 ```
