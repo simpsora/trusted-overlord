@@ -4,10 +4,8 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.support.AWSSupportAsync;
 import com.amazonaws.services.support.model.*;
-import com.beeva.trustedoverlord.clients.SupportClient;
 import com.beeva.trustedoverlord.clients.TrustedAdvisorClient;
 import com.beeva.trustedoverlord.model.ProfileChecks;
-import com.beeva.trustedoverlord.model.ProfileSupportCases;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
