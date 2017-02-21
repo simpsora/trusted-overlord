@@ -3,7 +3,6 @@ package com.beeva.trustedoverlord.reporter;
 import com.amazonaws.services.health.model.AWSHealthException;
 import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.Profile;
-import com.beeva.trustedoverlord.model.ProfileSupportCases;
 import com.beeva.trustedoverlord.utils.BannerLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
