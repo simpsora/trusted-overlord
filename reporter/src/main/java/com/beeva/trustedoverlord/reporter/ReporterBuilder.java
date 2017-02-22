@@ -2,7 +2,7 @@ package com.beeva.trustedoverlord.reporter;
 
 import com.amazonaws.services.health.model.AWSHealthException;
 import com.amazonaws.services.support.model.AWSSupportException;
-import com.beeva.trustedoverlord.model.Profile;
+import com.beeva.trustedoverlord.model.ProfileCollector;
 import com.beeva.trustedoverlord.utils.BannerLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +24,7 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
     private static Logger logger = LogManager.getLogger(ReporterBuilder.class);
     private static Logger banner = BannerLogger.getLogger();
 
-    private List<String> profiles;
+    private List<String> profileNames;
     private boolean toMarkdown = false;
     private boolean toLogger = false;
     private Logger loggerReporter = null;
@@ -37,8 +37,8 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
     private Integer numOpenCases = 0;
 
 
-    ReporterBuilder(String[] profiles) {
-        this.profiles = Arrays.asList(profiles);
+    ReporterBuilder(String[] profileNames) {
+        this.profileNames = Arrays.asList(profileNames);
     }
 
 
@@ -67,37 +67,37 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
 
     @Override
     public void report() {
-        List<Profile> profilesModel = new LinkedList<>();
+        List<ProfileCollector> profileCollectors = new LinkedList<>();
         // Initialize profiles and counters for reporting
-        profiles.forEach(profileName -> {
+        profileNames.forEach(profileName -> {
             try {
-                Profile profile = new Profile(profileName);
-                profilesModel.add(profile);
-                numErrors += profile.getProfileChecks().getErrors().size();
-                numWarnings += profile.getProfileChecks().getWarnings().size();
-                numOpenIssues += profile.getProfileHealth().getOpenIssues().size();
-                numSchedulesChanges += profile.getProfileHealth().getScheduledChanges().size();
-                numOtherNotifications += profile.getProfileHealth().getOtherNotifications().size();
-                numOpenCases += profile.getProfileSupportCases().getOpenCases().size();
+                ProfileCollector profileCollector = new ProfileCollector(profileName);
+                profileCollectors.add(profileCollector);
+                numErrors += profileCollector.getProfileChecks().getErrors().size();
+                numWarnings += profileCollector.getProfileChecks().getWarnings().size();
+                numOpenIssues += profileCollector.getProfileHealth().getOpenIssues().size();
+                numSchedulesChanges += profileCollector.getProfileHealth().getScheduledChanges().size();
+                numOtherNotifications += profileCollector.getProfileHealth().getOtherNotifications().size();
+                numOpenCases += profileCollector.getProfileSupportCases().getOpenCases().size();
             } catch (AWSSupportException | AWSHealthException e) {
                 logger.error(e);
             }
         });
 
         if (toLogger){
-            reportToLogger(profilesModel);
+            reportToLogger(profileCollectors);
         }
 
         if (toMarkdown){
-            reportToMarkdown(profilesModel);
+            reportToMarkdown(profileCollectors);
         }
 
     }
 
-    private void reportToLogger(List<Profile> profilesModel) {
-        profilesModel.forEach(profile -> {
-           profile.toLogger(loggerReporter);
-        });
+    private void reportToLogger(List<ProfileCollector> profilesModel) {
+        profilesModel.forEach(
+                profile -> profile.toLogger(loggerReporter)
+        );
 
         // Resume
         resumeReportToLogger();
@@ -121,7 +121,7 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
         banner.info("**************************************************************************");
     }
 
-    private void reportToMarkdown(List<Profile> profilesModel) {
+    private void reportToMarkdown(List<ProfileCollector> profilesModel) {
         StringBuffer result = new StringBuffer("# __Trusted Overlord Summary__\n")
                 .append("* __Errors__: ").append(numErrors).append("\n")
                 .append("* __Warnings__: ").append(numWarnings).append("\n")

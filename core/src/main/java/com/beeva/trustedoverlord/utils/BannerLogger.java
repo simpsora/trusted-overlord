@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Created by Architecture Team
+ * Created by BEEVA
  */
 public class BannerLogger {
 

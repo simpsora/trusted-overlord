@@ -12,9 +12,9 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by BEEVA
  */
-public class Profile {
+public class ProfileCollector {
 
-    private static Logger logger = LogManager.getLogger(Profile.class);
+    private static Logger logger = LogManager.getLogger(ProfileCollector.class);
     private static Logger banner = BannerLogger.getLogger();
 
     private String profileName;
@@ -22,7 +22,7 @@ public class Profile {
     private ProfileHealth profileHealth = new ProfileHealth();
     private ProfileSupportCases profileSupportCases = new ProfileSupportCases();
 
-    public Profile(String profileName) {
+    public ProfileCollector(String profileName) {
 
         this.profileName = profileName;
 
