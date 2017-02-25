@@ -36,7 +36,7 @@ public class HealthClient implements Client {
         this.client = client;
     }
 
-    public Future<ProfileHealth> getProfileHealth() {
+    public CompletableFuture<ProfileHealth> getProfileHealth() {
 
         ProfileHealth profileHealth = new ProfileHealth();
         CompletableFuture<ProfileHealth> future = new CompletableFuture<>();

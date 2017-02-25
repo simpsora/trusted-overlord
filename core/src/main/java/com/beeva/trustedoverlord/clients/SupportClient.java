@@ -35,7 +35,7 @@ public class SupportClient implements Client {
         this.client = client;
     }
 
-    public Future<ProfileSupportCases> getSupportCases() {
+    public CompletableFuture<ProfileSupportCases> getSupportCases() {
         ProfileSupportCases cases = new ProfileSupportCases();
         CompletableFuture<ProfileSupportCases> future = new CompletableFuture<>();
 

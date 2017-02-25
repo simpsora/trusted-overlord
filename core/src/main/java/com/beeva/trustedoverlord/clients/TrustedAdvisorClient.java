@@ -41,7 +41,7 @@ public class TrustedAdvisorClient implements Client {
         this.client = client;
     }
 
-    public Future<ProfileChecks> getProfileChecks() {
+    public CompletableFuture<ProfileChecks> getProfileChecks() {
 
         CompletableFuture<ProfileChecks> future = new CompletableFuture<>();
 
