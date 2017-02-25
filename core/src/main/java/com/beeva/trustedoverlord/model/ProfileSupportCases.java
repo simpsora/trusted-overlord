@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Model class to store the results of the invocation to the AWS Support API
+ */
 public class ProfileSupportCases {
 
     private List<Case> openCases;

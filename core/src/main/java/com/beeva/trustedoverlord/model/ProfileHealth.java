@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by BEEVA
+ * Model class to store the results of the invocation to the AWS Health API
  */
 public class ProfileHealth {
 

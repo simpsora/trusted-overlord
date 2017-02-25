@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Lists of errors and warnings
+ * Model class to store the results of the invocation to the AWS TrustedAdvisor API
  */
 public class ProfileChecks {
 
