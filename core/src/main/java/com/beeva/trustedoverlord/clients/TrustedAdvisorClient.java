@@ -149,9 +149,9 @@ public class TrustedAdvisorClient implements Client {
         private void waitForFuturesToComplete(List<Future<DescribeTrustedAdvisorCheckResultResult>> futures) {
             futures.parallelStream().forEach(future -> {
                 try {
-                    future.get(2, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
-                    System.err.println(ignored);
+                    future.get(20, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    logger.error(e);
                 }
             });
         }

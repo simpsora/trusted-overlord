@@ -3,6 +3,7 @@ package com.beeva.trustedoverlord.reporter;
 import com.amazonaws.services.health.model.AWSHealthException;
 import com.amazonaws.services.support.model.AWSSupportException;
 import com.beeva.trustedoverlord.model.ProfileCollector;
+import com.beeva.trustedoverlord.model.ProfileCollectorAggregator;
 import com.beeva.trustedoverlord.utils.BannerLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,16 +26,11 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
     private static Logger banner = BannerLogger.getLogger();
 
     private List<String> profileNames;
+    private ProfileCollectorAggregator pca;
+
     private boolean toMarkdown = false;
     private boolean toLogger = false;
     private Logger loggerReporter = null;
-    //Variables for reporting
-    private Integer numWarnings = 0;
-    private Integer numErrors = 0;
-    private Integer numOpenIssues = 0;
-    private Integer numSchedulesChanges = 0;
-    private Integer numOtherNotifications = 0;
-    private Integer numOpenCases = 0;
 
 
     ReporterBuilder(String[] profileNames) {
@@ -67,70 +63,59 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
 
     @Override
     public void report() {
-        List<ProfileCollector> profileCollectors = new LinkedList<>();
-        // Initialize profiles and counters for reporting
-        profileNames.forEach(profileName -> {
-            try {
-                ProfileCollector profileCollector = new ProfileCollector(profileName);
-                profileCollectors.add(profileCollector);
-                numErrors += profileCollector.getProfileChecks().getErrors().size();
-                numWarnings += profileCollector.getProfileChecks().getWarnings().size();
-                numOpenIssues += profileCollector.getProfileHealth().getOpenIssues().size();
-                numSchedulesChanges += profileCollector.getProfileHealth().getScheduledChanges().size();
-                numOtherNotifications += profileCollector.getProfileHealth().getOtherNotifications().size();
-                numOpenCases += profileCollector.getProfileSupportCases().getOpenCases().size();
-            } catch (AWSSupportException | AWSHealthException e) {
-                logger.error(e);
-            }
-        });
+        this.pca = new ProfileCollectorAggregator(this.profileNames);
 
         if (toLogger){
-            reportToLogger(profileCollectors);
+            reportToLogger(this.pca);
         }
 
         if (toMarkdown){
-            reportToMarkdown(profileCollectors);
+            reportToMarkdown(this.pca);
         }
 
     }
 
-    private void reportToLogger(List<ProfileCollector> profilesModel) {
-        profilesModel.forEach(
+    private void reportToLogger(ProfileCollectorAggregator pca) {
+        pca.getProfileCollectors().forEach(
                 profile -> profile.toLogger(loggerReporter)
         );
 
         // Resume
-        resumeReportToLogger();
+        resumeReportToLogger(pca);
     }
 
-    private void resumeReportToLogger() {
+    private void resumeReportToLogger(ProfileCollectorAggregator pca) {
         banner.info("");
         banner.info("");
         banner.info("**************************************************************************");
         banner.info("HEALTH:");
-        banner.info("  Total Open Issues: {}", numOpenIssues);
-        banner.info("  Scheduled Changes: {}", numSchedulesChanges);
-        banner.info("  Other Notifications: {}", numOtherNotifications);
+        banner.info("  Total Open Issues: {}", pca.getNumOpenIssues());
+        banner.info("  Scheduled Changes: {}", pca.getNumSchedulesChanges());
+        banner.info("  Other Notifications: {}", pca.getNumOtherNotifications());
         banner.info("");
         banner.info("TRUSTED ADVISOR:");
-        banner.info("  Total Errors: {}",numErrors);
-        banner.info("  Total Warnings: {}", numWarnings);
+        banner.info("  Total Errors: {}",pca.getNumErrors());
+        banner.info("  Total Warnings: {}", pca.getNumWarnings());
         banner.info("");
         banner.info("SUPPORT:");
-        banner.info("  Total Open Cases: {}", numOpenCases);
+        banner.info("  Total Open Cases: {}", pca.getNumOpenCases());
         banner.info("**************************************************************************");
     }
 
-    private void reportToMarkdown(List<ProfileCollector> profilesModel) {
+    private void reportToMarkdown(ProfileCollectorAggregator pca) {
         StringBuffer result = new StringBuffer("# __Trusted Overlord Summary__\n")
-                .append("* __Errors__: ").append(numErrors).append("\n")
-                .append("* __Warnings__: ").append(numWarnings).append("\n")
-                .append("* __Open Issues__: ").append(numOpenIssues).append("\n")
-                .append("* __Scheduled Changes__: ").append(numSchedulesChanges).append("\n")
-                .append("* __Other Notifications__: ").append(numOtherNotifications).append("\n")
+                .append("#### HEALTH").append("\n")
+                .append("* __Open Issues__: ").append(pca.getNumOpenIssues()).append("\n")
+                .append("* __Scheduled Changes__: ").append(pca.getNumSchedulesChanges()).append("\n")
+                .append("* __Other Notifications__: ").append(pca.getNumOtherNotifications()).append("\n")
+                .append("#### TRUSTED ADVISOR").append("\n")
+                .append("* __Errors__: ").append(pca.getNumErrors()).append("\n")
+                .append("* __Warnings__: ").append(pca.getNumWarnings()).append("\n")
+                .append("#### SUPPORT").append("\n")
+                .append("* __Open Cases__: ").append(pca.getNumOpenCases()).append("\n")
                 .append("\n---\n");
 
-        profilesModel.forEach(profile -> result.append(profile.toMarkdown()));
+        pca.getProfileCollectors().forEach(profile -> result.append(profile.toMarkdown()));
 
         writeToFile(result);
     }

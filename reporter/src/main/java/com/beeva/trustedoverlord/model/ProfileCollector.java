@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
 import java.util.concurrent.ExecutionException;
 
 /**
+ * Collects the results of the invocation to the AWS APIs: TrustedAdvisor, Health and Support
+ * for a single profile
+ *
  * Created by BEEVA
  */
 public class ProfileCollector {
@@ -70,6 +73,9 @@ public class ProfileCollector {
         return profileSupportCases;
     }
 
+    /**
+     * Exports the results in a String Formatted with Markdown syntax
+     */
     public String toMarkdown() {
 
         String pChecks = profileChecks.to(
@@ -112,6 +118,9 @@ public class ProfileCollector {
 
     }
 
+    /**
+     * Prints the results using a specific Logger
+     */
     public void toLogger(Logger logger){
         banner.info("");
         banner.info("=====================================================================");
