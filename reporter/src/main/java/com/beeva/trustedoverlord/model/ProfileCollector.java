@@ -7,6 +7,7 @@ import com.beeva.trustedoverlord.utils.BannerLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -32,23 +33,35 @@ public class ProfileCollector {
 
         try {
 
-            try {
-                this.profileChecks = TrustedOverlordClientFactory.trustedAdvisorApi().clientWithProfile(profileName)
-                        .autoshutdown().getProfileChecks().get();
+            CompletableFuture<ProfileChecks> profileChecksFuture = TrustedOverlordClientFactory.trustedAdvisorApi()
+                    .clientWithProfile(profileName)
+                    .autoshutdown()
+                    .getProfileChecks();
+
+            CompletableFuture<ProfileHealth> profileHealthFuture = TrustedOverlordClientFactory.healthApi()
+                    .clientWithProfile(profileName)
+                    .autoshutdown()
+                    .getProfileHealth();
+
+            CompletableFuture<ProfileSupportCases> profileSupportCasesFuture = TrustedOverlordClientFactory.supportApi()
+                    .clientWithProfile(profileName)
+                    .autoshutdown()
+                    .getSupportCases();
+
+            try{
+                this.profileChecks = profileChecksFuture.get();
             } catch (AWSSupportException e) {
                 logger.error(e.getErrorMessage());
             }
 
             try {
-                this.profileHealth = TrustedOverlordClientFactory.healthApi().clientWithProfile(profileName)
-                        .autoshutdown().getProfileHealth().get();
+                this.profileHealth = profileHealthFuture.get();
             } catch (AWSHealthException e) {
                 logger.error(e.getErrorMessage());
             }
 
             try {
-                this.profileSupportCases = TrustedOverlordClientFactory.supportApi().clientWithProfile(profileName)
-                        .autoshutdown().getSupportCases().get();
+                this.profileSupportCases = profileSupportCasesFuture.get();
             } catch (AWSSupportException e) {
                 logger.error(e.getErrorMessage());
             }
