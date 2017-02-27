@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Initializes one ProfileCollector per profile and Aggregates all the results
@@ -39,7 +40,7 @@ public class ProfileCollectorAggregator {
                 numSchedulesChanges += profile.getProfileHealth().getScheduledChanges().size();
                 numOtherNotifications += profile.getProfileHealth().getOtherNotifications().size();
                 numOpenCases += profile.getProfileSupportCases().getOpenCases().size();
-            } catch (AWSSupportException | AWSHealthException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 logger.error(e);
             }
         });

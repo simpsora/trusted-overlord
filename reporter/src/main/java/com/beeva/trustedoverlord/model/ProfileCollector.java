@@ -22,69 +22,59 @@ public class ProfileCollector {
     private static Logger banner = BannerLogger.getLogger();
 
     private String profileName;
-    private Exception profileException = null;
-    private ProfileChecks profileChecks = new ProfileChecks();
-    private ProfileHealth profileHealth = new ProfileHealth();
-    private ProfileSupportCases profileSupportCases = new ProfileSupportCases();
+    private CompletableFuture<ProfileChecks> profileChecksFuture;
+    private CompletableFuture<ProfileHealth> profileHealthFuture;
+    private CompletableFuture<ProfileSupportCases> profileSupportCasesFuture;
 
     public ProfileCollector(String profileName) {
 
         this.profileName = profileName;
 
-        try {
+        this.profileChecksFuture = TrustedOverlordClientFactory.trustedAdvisorApi()
+                .clientWithProfile(this.profileName)
+                .autoshutdown()
+                .getProfileChecks();
 
-            CompletableFuture<ProfileChecks> profileChecksFuture = TrustedOverlordClientFactory.trustedAdvisorApi()
-                    .clientWithProfile(profileName)
-                    .autoshutdown()
-                    .getProfileChecks();
+        this.profileHealthFuture = TrustedOverlordClientFactory.healthApi()
+                .clientWithProfile(this.profileName)
+                .autoshutdown()
+                .getProfileHealth();
 
-            CompletableFuture<ProfileHealth> profileHealthFuture = TrustedOverlordClientFactory.healthApi()
-                    .clientWithProfile(profileName)
-                    .autoshutdown()
-                    .getProfileHealth();
-
-            CompletableFuture<ProfileSupportCases> profileSupportCasesFuture = TrustedOverlordClientFactory.supportApi()
-                    .clientWithProfile(profileName)
-                    .autoshutdown()
-                    .getSupportCases();
-
-            try{
-                this.profileChecks = profileChecksFuture.get();
-            } catch (AWSSupportException e) {
-                logger.error(e.getErrorMessage());
-            }
-
-            try {
-                this.profileHealth = profileHealthFuture.get();
-            } catch (AWSHealthException e) {
-                logger.error(e.getErrorMessage());
-            }
-
-            try {
-                this.profileSupportCases = profileSupportCasesFuture.get();
-            } catch (AWSSupportException e) {
-                logger.error(e.getErrorMessage());
-            }
-
-        } catch (InterruptedException | ExecutionException e) {
-            this.profileException = new Exception(e);
-        }
+        this.profileSupportCasesFuture = TrustedOverlordClientFactory.supportApi()
+                .clientWithProfile(this.profileName)
+                .autoshutdown()
+                .getSupportCases();
     }
 
     public String getProfileName() {
-        return profileName;
+        return this.profileName;
     }
 
-    public ProfileChecks getProfileChecks() {
-        return profileChecks;
+    public ProfileChecks getProfileChecks() throws ExecutionException, InterruptedException {
+        try{
+            return this.profileChecksFuture.get();
+        } catch (AWSSupportException e) {
+            logger.error(e.getErrorMessage());
+            return new ProfileChecks();
+        }
     }
 
-    public ProfileHealth getProfileHealth() {
-        return profileHealth;
+    public ProfileHealth getProfileHealth() throws ExecutionException, InterruptedException {
+        try {
+            return this.profileHealthFuture.get();
+        } catch (AWSHealthException e) {
+            logger.error(e.getErrorMessage());
+            return new ProfileHealth();
+        }
     }
 
-    public ProfileSupportCases getProfileSupportCases() {
-        return profileSupportCases;
+    public ProfileSupportCases getProfileSupportCases() throws ExecutionException, InterruptedException {
+        try {
+            return this.profileSupportCasesFuture.get();
+        } catch (AWSSupportException e) {
+            logger.error(e.getErrorMessage());
+            return new ProfileSupportCases();
+        }
     }
 
     /**
@@ -92,65 +82,60 @@ public class ProfileCollector {
      */
     public String toMarkdown() {
 
-        if (this.profileException != null){
+        try {
+            String pChecks = getProfileChecks().to(
+                    (errors, warnings, exceptions) -> {
+                        StringBuffer result = new StringBuffer();
+                        errors.forEach(error -> result.append("* __Error:__ ").append(error).append("\n"));
+                        warnings.forEach(warning -> result.append("* __Warning:__ ").append(warning).append("\n"));
+                        exceptions.forEach(exception -> result.append("* __Exception:__ ").append(exception).append("\n"));
+                        return result.toString();
+                    }
+            );
+
+            String pHealth = getProfileHealth().to(
+                    (openIssues, scheduledChanges, otherNotifications) -> {
+                        StringBuffer result = new StringBuffer();
+                        openIssues.forEach(openIssue -> result.append("* __Open Issue:__ ").append(openIssue).append("\n"));
+                        scheduledChanges.forEach(scheduledChange -> result.append("* __Scheduled Change:__ ").append(scheduledChange).append("\n"));
+                        otherNotifications.forEach(otherNotification -> result.append("* __Other Notification:__ ").append(otherNotification).append("\n"));
+                        return result.toString();
+                    }
+            );
+
+            String pSupport = getProfileSupportCases().to(
+                    (openCases, resolvedCases) -> {
+                        StringBuffer result = new StringBuffer();
+                        openCases.forEach(openCase -> result.append("* __Open Case:__ ").append(openCase.toString()).append("\n"));
+                        resolvedCases.forEach(resolvedCase -> result.append("* __Resolved Case:__ ").append(resolvedCase.toString()).append("\n"));
+                        return result.toString();
+                    }
+            );
+
             return new StringBuffer("## __").append(profileName).append("__\n")
-                    .append(profileException.getMessage())
+                    .append("#### __Trusted Advisor__\n")
+                    .append(pChecks)
+                    .append("#### __Health Dashboard__\n")
+                    .append(pHealth)
+                    .append("#### __Support Cases__\n")
+                    .append(pSupport)
+                    .append("\n---\n").toString();
+
+        } catch (ExecutionException | InterruptedException e) {
+            return new StringBuffer("## __").append(profileName).append("__\n")
+                    .append(e.getMessage())
                     .append("\n---\n").toString();
         }
-
-        String pChecks = getProfileChecks().to(
-                (errors, warnings, exceptions) -> {
-                    StringBuffer result = new StringBuffer();
-                    errors.forEach(error -> result.append("* __Error:__ ").append(error).append("\n"));
-                    warnings.forEach(warning -> result.append("* __Warning:__ ").append(warning).append("\n"));
-                    exceptions.forEach(exception -> result.append("* __Exception:__ ").append(exception).append("\n"));
-                    return result.toString();
-                }
-        );
-
-        String pHealth = getProfileHealth().to(
-                (openIssues, scheduledChanges, otherNotifications) -> {
-                    StringBuffer result = new StringBuffer();
-                    openIssues.forEach(openIssue -> result.append("* __Open Issue:__ ").append(openIssue).append("\n"));
-                    scheduledChanges.forEach(scheduledChange -> result.append("* __Scheduled Change:__ ").append(scheduledChange).append("\n"));
-                    otherNotifications.forEach(otherNotification -> result.append("* __Other Notification:__ ").append(otherNotification).append("\n"));
-                    return result.toString();
-                }
-        );
-
-        String pSupport = getProfileSupportCases().to(
-                (openCases, resolvedCases) -> {
-                    StringBuffer result = new StringBuffer();
-                    openCases.forEach(openCase -> result.append("* __Open Case:__ ").append(openCase.toString()).append("\n"));
-                    resolvedCases.forEach(resolvedCase -> result.append("* __Resolved Case:__ ").append(resolvedCase.toString()).append("\n"));
-                    return result.toString();
-                }
-        );
-
-        return new StringBuffer("## __").append(profileName).append("__\n")
-                .append("#### __Trusted Advisor__\n")
-                .append(pChecks)
-                .append("#### __Health Dashboard__\n")
-                .append(pHealth)
-                .append("#### __Support Cases__\n")
-                .append(pSupport)
-                .append("\n---\n").toString();
-
     }
 
     /**
      * Prints the results using a specific Logger
      */
     public void toLogger(Logger logger) {
-        if (this.profileException != null) {
-            banner.info("");
-            banner.info("=====================================================================");
-            banner.info("An exception occurred while processing profile '{}'", getProfileName());
-            banner.info("=====================================================================");
 
-            logger.error(profileException);
+        try {
+            ProfileHealth profileHealth = getProfileHealth();
 
-        } else {
             banner.info("");
             banner.info("=====================================================================");
             banner.info("Checking Health for profile '{}'", getProfileName());
@@ -158,18 +143,20 @@ public class ProfileCollector {
 
             profileHealth.to(
                     (openIssues, scheduledChanges, otherNotifications) -> {
-                        logger.info(" # Open Issues: {}", getProfileHealth().getOpenIssues().size());
-                        logger.info(" # Schedules Changes: {}", getProfileHealth().getScheduledChanges().size());
-                        logger.info(" # Other Notifications: {}", getProfileHealth().getOtherNotifications().size());
+                        logger.info(" # Open Issues: {}", profileHealth.getOpenIssues().size());
+                        logger.info(" # Schedules Changes: {}", profileHealth.getScheduledChanges().size());
+                        logger.info(" # Other Notifications: {}", profileHealth.getOtherNotifications().size());
                         logger.info("");
 
-                        getProfileHealth().getOpenIssues().forEach(openIssue -> logger.error(" + Open Issue: {}", openIssue));
-                        getProfileHealth().getScheduledChanges().forEach(scheduledChange -> logger.warn(" + Scheduled Change: {}", scheduledChange));
-                        getProfileHealth().getOtherNotifications().forEach(otherNotification -> logger.info(" + Other Notification: {}", otherNotification));
+                        profileHealth.getOpenIssues().forEach(openIssue -> logger.error(" + Open Issue: {}", openIssue));
+                        profileHealth.getScheduledChanges().forEach(scheduledChange -> logger.warn(" + Scheduled Change: {}", scheduledChange));
+                        profileHealth.getOtherNotifications().forEach(otherNotification -> logger.info(" + Other Notification: {}", otherNotification));
 
                         return null;
                     }
             );
+
+            ProfileChecks profileChecks = getProfileChecks();
 
             banner.info("");
             banner.info("=====================================================================");
@@ -178,17 +165,18 @@ public class ProfileCollector {
 
             profileChecks.to(
                     ((errors, warnings, exceptions) -> {
-                        logger.info(" # Errors: {}", getProfileChecks().getErrors().size());
-                        logger.info(" # Warnings: {}", getProfileChecks().getWarnings().size());
+                        logger.info(" # Errors: {}", profileChecks.getErrors().size());
+                        logger.info(" # Warnings: {}", profileChecks.getWarnings().size());
                         logger.info("");
 
-                        getProfileChecks().getErrors().forEach(error -> logger.error(" + Error: {}", error));
-                        getProfileChecks().getWarnings().forEach(warning -> logger.warn(" + Warning: {}", warning));
+                        profileChecks.getErrors().forEach(error -> logger.error(" + Error: {}", error));
+                        profileChecks.getWarnings().forEach(warning -> logger.warn(" + Warning: {}", warning));
 
                         return null;
                     })
             );
 
+            ProfileSupportCases profileSupportCases = getProfileSupportCases();
 
             banner.info("");
             banner.info("=====================================================================");
@@ -197,14 +185,22 @@ public class ProfileCollector {
 
             profileSupportCases.to(
                     (openCases, resolvedCases) -> {
-                        logger.info(" # Open Cases: {}", getProfileSupportCases().getOpenCases().size());
+                        logger.info(" # Open Cases: {}", profileSupportCases.getOpenCases().size());
                         logger.info("");
 
-                        getProfileSupportCases().getOpenCases().forEach(caseDetail -> logger.warn(" + Open Case: {}", caseDetail));
+                        profileSupportCases.getOpenCases().forEach(caseDetail -> logger.warn(" + Open Case: {}", caseDetail));
 
                         return null;
                     }
             );
+
+        } catch (ExecutionException | InterruptedException e) {
+            banner.info("");
+            banner.info("=====================================================================");
+            banner.info("An exception occurred while processing profile '{}'", getProfileName());
+            banner.info("=====================================================================");
+
+            logger.error(e);
         }
     }
 
