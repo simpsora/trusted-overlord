@@ -28,6 +28,8 @@ public class ProfileCollector {
 
     public ProfileCollector(String profileName) {
 
+        logger.info("Retrieving information for profile: '{}'...", profileName);
+
         this.profileName = profileName;
 
         this.profileChecksFuture = TrustedOverlordClientFactory.trustedAdvisorApi()

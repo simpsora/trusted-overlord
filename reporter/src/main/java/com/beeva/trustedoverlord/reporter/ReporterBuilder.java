@@ -77,7 +77,10 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
 
     private void reportToLogger(ProfileCollectorAggregator pca) {
         pca.getProfileCollectors().forEach(
-                profile -> profile.toLogger(loggerReporter)
+                profile -> {
+                    loggerReporter.info("\n\nGenerating logger reporter for profile '{}'...", profile.getProfileName());
+                    profile.toLogger(loggerReporter);
+                }
         );
 
         // Resume
@@ -100,6 +103,7 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
         banner.info("SUPPORT:");
         banner.info("  Total Open Cases: {}", pca.getNumOpenCases());
         banner.info("**************************************************************************");
+        banner.info("");
     }
 
     private void reportToMarkdown(ProfileCollectorAggregator pca) {
