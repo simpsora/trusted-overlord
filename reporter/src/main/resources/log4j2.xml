@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{ISO8601} %highlight{%-5level}{INFO=normal} [%t] %logger{1.}: %msg%n%throwable"/>
+		</Console>
+        <Console name="Banners" target="SYSTEM_OUT">
+            <PatternLayout pattern="%msg%n%throwable"/>
+        </Console>
+	</Appenders>
+	<Loggers>
+        <Logger name="com.beeva.trustedoverlord.utils.BannerLogger" level="INFO" additivity="false">
+            <AppenderRef ref="Banners"/>
+        </Logger>
+		<Root level="info">
+			<AppenderRef ref="Console"/>
+		</Root>
+	</Loggers>
+</Configuration>
