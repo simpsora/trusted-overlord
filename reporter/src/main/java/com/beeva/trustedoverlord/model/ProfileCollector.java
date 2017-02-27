@@ -21,6 +21,7 @@ public class ProfileCollector {
     private static Logger banner = BannerLogger.getLogger();
 
     private String profileName;
+    private Exception profileException = null;
     private ProfileChecks profileChecks = new ProfileChecks();
     private ProfileHealth profileHealth = new ProfileHealth();
     private ProfileSupportCases profileSupportCases = new ProfileSupportCases();
@@ -53,7 +54,7 @@ public class ProfileCollector {
             }
 
         } catch (InterruptedException | ExecutionException e) {
-            logger.error(e);
+            this.profileException = new Exception(e);
         }
     }
 
@@ -77,6 +78,12 @@ public class ProfileCollector {
      * Exports the results in a String Formatted with Markdown syntax
      */
     public String toMarkdown() {
+
+        if (this.profileException != null){
+            return new StringBuffer("## __").append(profileName).append("__\n")
+                    .append(profileException.getMessage())
+                    .append("\n---\n").toString();
+        }
 
         String pChecks = profileChecks.to(
                 (errors, warnings, exceptions) -> {
@@ -121,61 +128,71 @@ public class ProfileCollector {
     /**
      * Prints the results using a specific Logger
      */
-    public void toLogger(Logger logger){
-        banner.info("");
-        banner.info("=====================================================================");
-        banner.info("Checking Health for profile '{}'", getProfileName());
-        banner.info("=====================================================================");
+    public void toLogger(Logger logger) {
+        if (this.profileException != null) {
+            banner.info("");
+            banner.info("=====================================================================");
+            banner.info("An exception occurred while processing profile '{}'", getProfileName());
+            banner.info("=====================================================================");
 
-        profileHealth.to(
-                (openIssues, scheduledChanges, otherNotifications) -> {
-                    logger.info(" # Open Issues: {}", getProfileHealth().getOpenIssues().size());
-                    logger.info(" # Schedules Changes: {}", getProfileHealth().getScheduledChanges().size());
-                    logger.info(" # Other Notifications: {}", getProfileHealth().getOtherNotifications().size());
-                    logger.info("");
+            logger.error(profileException);
 
-                    getProfileHealth().getOpenIssues().forEach(openIssue -> logger.error(" + Open Issue: {}", openIssue));
-                    getProfileHealth().getScheduledChanges().forEach(scheduledChange -> logger.warn(" + Scheduled Change: {}", scheduledChange));
-                    getProfileHealth().getOtherNotifications().forEach(otherNotification -> logger.info(" + Other Notification: {}", otherNotification));
+        } else {
+            banner.info("");
+            banner.info("=====================================================================");
+            banner.info("Checking Health for profile '{}'", getProfileName());
+            banner.info("=====================================================================");
 
-                    return null;
-                }
-        );
+            profileHealth.to(
+                    (openIssues, scheduledChanges, otherNotifications) -> {
+                        logger.info(" # Open Issues: {}", getProfileHealth().getOpenIssues().size());
+                        logger.info(" # Schedules Changes: {}", getProfileHealth().getScheduledChanges().size());
+                        logger.info(" # Other Notifications: {}", getProfileHealth().getOtherNotifications().size());
+                        logger.info("");
 
-        banner.info("");
-        banner.info("=====================================================================");
-        banner.info("Checking Trusted Advisor for profile '{}'", getProfileName());
-        banner.info("=====================================================================");
+                        getProfileHealth().getOpenIssues().forEach(openIssue -> logger.error(" + Open Issue: {}", openIssue));
+                        getProfileHealth().getScheduledChanges().forEach(scheduledChange -> logger.warn(" + Scheduled Change: {}", scheduledChange));
+                        getProfileHealth().getOtherNotifications().forEach(otherNotification -> logger.info(" + Other Notification: {}", otherNotification));
 
-        profileChecks.to(
-                ((errors, warnings, exceptions) -> {
-                    logger.info(" # Errors: {}", getProfileChecks().getErrors().size());
-                    logger.info(" # Warnings: {}", getProfileChecks().getWarnings().size());
-                    logger.info("");
+                        return null;
+                    }
+            );
 
-                    getProfileChecks().getErrors().forEach(error -> logger.error(" + Error: {}", error));
-                    getProfileChecks().getWarnings().forEach(warning -> logger.warn(" + Warning: {}", warning));
+            banner.info("");
+            banner.info("=====================================================================");
+            banner.info("Checking Trusted Advisor for profile '{}'", getProfileName());
+            banner.info("=====================================================================");
 
-                    return null;
-                })
-        );
+            profileChecks.to(
+                    ((errors, warnings, exceptions) -> {
+                        logger.info(" # Errors: {}", getProfileChecks().getErrors().size());
+                        logger.info(" # Warnings: {}", getProfileChecks().getWarnings().size());
+                        logger.info("");
+
+                        getProfileChecks().getErrors().forEach(error -> logger.error(" + Error: {}", error));
+                        getProfileChecks().getWarnings().forEach(warning -> logger.warn(" + Warning: {}", warning));
+
+                        return null;
+                    })
+            );
 
 
-        banner.info("");
-        banner.info("=====================================================================");
-        banner.info("Checking AWS Support Cases for profile '{}'", getProfileName());
-        banner.info("=====================================================================");
+            banner.info("");
+            banner.info("=====================================================================");
+            banner.info("Checking AWS Support Cases for profile '{}'", getProfileName());
+            banner.info("=====================================================================");
 
-        profileSupportCases.to(
-                (openCases, resolvedCases) -> {
-                    logger.info(" # Open Cases: {}", getProfileSupportCases().getOpenCases().size());
-                    logger.info("");
+            profileSupportCases.to(
+                    (openCases, resolvedCases) -> {
+                        logger.info(" # Open Cases: {}", getProfileSupportCases().getOpenCases().size());
+                        logger.info("");
 
-                    getProfileSupportCases().getOpenCases().forEach(caseDetail -> logger.warn(" + Open Case: {}", caseDetail));
+                        getProfileSupportCases().getOpenCases().forEach(caseDetail -> logger.warn(" + Open Case: {}", caseDetail));
 
-                    return null;
-                }
-        );
+                        return null;
+                    }
+            );
+        }
     }
 
 }
