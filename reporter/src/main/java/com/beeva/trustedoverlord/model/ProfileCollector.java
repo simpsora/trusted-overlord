@@ -98,7 +98,7 @@ public class ProfileCollector {
                     .append("\n---\n").toString();
         }
 
-        String pChecks = profileChecks.to(
+        String pChecks = getProfileChecks().to(
                 (errors, warnings, exceptions) -> {
                     StringBuffer result = new StringBuffer();
                     errors.forEach(error -> result.append("* __Error:__ ").append(error).append("\n"));
@@ -108,7 +108,7 @@ public class ProfileCollector {
                 }
         );
 
-        String pHealth = profileHealth.to(
+        String pHealth = getProfileHealth().to(
                 (openIssues, scheduledChanges, otherNotifications) -> {
                     StringBuffer result = new StringBuffer();
                     openIssues.forEach(openIssue -> result.append("* __Open Issue:__ ").append(openIssue).append("\n"));
@@ -118,7 +118,7 @@ public class ProfileCollector {
                 }
         );
 
-        String pSupport = profileSupportCases.to(
+        String pSupport = getProfileSupportCases().to(
                 (openCases, resolvedCases) -> {
                     StringBuffer result = new StringBuffer();
                     openCases.forEach(openCase -> result.append("* __Open Case:__ ").append(openCase.toString()).append("\n"));
