@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -29,7 +30,7 @@ public class ProfileCollectorAggregator {
 
     public ProfileCollectorAggregator(List<String> profileNames) {
 
-        profileCollectors = new ArrayList<>(profileNames.size());
+        profileCollectors = Collections.synchronizedList(new ArrayList<>(profileNames.size()));
         profileNames.parallelStream().forEach(profileName -> {
             ProfileCollector profile = new ProfileCollector(profileName);
             profileCollectors.add(profile);
