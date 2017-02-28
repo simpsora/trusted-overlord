@@ -30,10 +30,12 @@ public class ProfileCollectorAggregator {
     public ProfileCollectorAggregator(List<String> profileNames) {
 
         profileCollectors = new ArrayList<>(profileNames.size());
-        profileNames.forEach(profileName -> {
+        profileNames.parallelStream().forEach(profileName -> {
             ProfileCollector profile = new ProfileCollector(profileName);
             profileCollectors.add(profile);
         });
+
+        logger.info("Waiting for requests to complete and generating reports...");
 
         profileCollectors.forEach(profile -> {
             try {

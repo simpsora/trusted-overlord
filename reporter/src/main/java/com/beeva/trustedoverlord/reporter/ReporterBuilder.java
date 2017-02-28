@@ -78,7 +78,7 @@ class ReporterBuilder implements ReporterToBuilder, ReporterAndBuilder{
     private void reportToLogger(ProfileCollectorAggregator pca) {
         pca.getProfileCollectors().forEach(
                 profile -> {
-                    loggerReporter.info("\n\nGenerating logger reporter for profile '{}'...", profile.getProfileName());
+                    loggerReporter.info("\n\nGenerating logger report for profile '{}'...", profile.getProfileName());
                     profile.toLogger(loggerReporter);
                 }
         );
