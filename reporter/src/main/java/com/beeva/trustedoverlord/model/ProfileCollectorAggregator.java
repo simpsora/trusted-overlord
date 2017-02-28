@@ -31,9 +31,12 @@ public class ProfileCollectorAggregator {
 
         profileCollectors = new ArrayList<>(profileNames.size());
         profileNames.forEach(profileName -> {
+            ProfileCollector profile = new ProfileCollector(profileName);
+            profileCollectors.add(profile);
+        });
+
+        profileCollectors.forEach(profile -> {
             try {
-                ProfileCollector profile = new ProfileCollector(profileName);
-                profileCollectors.add(profile);
                 numErrors += profile.getProfileChecks().getErrors().size();
                 numWarnings += profile.getProfileChecks().getWarnings().size();
                 numOpenIssues += profile.getProfileHealth().getOpenIssues().size();
