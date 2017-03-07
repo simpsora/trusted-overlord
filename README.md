@@ -18,10 +18,10 @@ mvn clean compile package
 ```
 
 Run Trusted Overlord passing your profile names as arguments.
-(Inside reporter/target/) execute:
+Execute the JAR file inside `reporter/target/` directory as follows:
 
 ```
-java -jar trustedoverlord-reporter-1.0-SNAPSHOT.jar profileName1 profileName2...
+java -jar trustedoverlord-reporter-1.1.0-SNAPSHOT.jar profileName1 profileName2...
 ```
 
 Please note that you must configure permissions using the [standard AWS Credentials management method](https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/)
@@ -42,7 +42,13 @@ Please note that you must configure permissions using the [standard AWS Credenti
   \_/_|   \__,_|___/\__\___|\__,_|  \___/  \_/ \___|_|  |_|\___/|_|  \__,_|
 
 
-2017-02-08T10:27:35,262 INFO  [main] c.b.t.TrustedOverlord: ...will now check 1 AWS accounts.
+2017-02-08T10:27:35,087 INFO  [main] c.b.t.TrustedOverlordMain: ...will now check 4 AWS accounts. 
+2017-02-08T10:27:35,136 INFO  [main] c.b.t.m.ProfileCollector: Retrieving information for profile: 'profileName1'...
+2017-02-08T10:27:35,136 INFO  [ForkJoinPool.commonPool-worker-1] c.b.t.m.ProfileCollector: Retrieving information for profile: 'profileName2'...
+2017-02-08T10:27:35,678 INFO  [main] c.b.t.m.ProfileCollectorAggregator: Waiting for requests to complete and generating reports...
+2017-02-08T10:27:35,998 INFO  [main] c.b.t.TrustedOverlordMain: 
+
+Generating logger report for profile 'profileName1'...
 
 =====================================================================
 Checking Health for profile 'profileName1'
@@ -82,6 +88,7 @@ Checking AWS Support Cases for profile 'profileName1'
 2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlordMain:  # Open Cases: 0
 2017-02-08T10:27:48,740 INFO  [main] c.b.t.TrustedOverlordMain:
 
+Generating logger report for profile 'profileName2'...
 
 =====================================================================
 Checking Health for profile 'profileName2'
