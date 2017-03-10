@@ -26,6 +26,7 @@ public class SupportClient implements Client {
     public SupportClient(String profile) {
         this(AWSSupportAsyncClientBuilder
                 .standard()
+                    .withCredentials(new ProfileCredentialsProvider(profile))
                     .withRegion(Regions.US_EAST_1.getName())
                 .build());
     }

@@ -32,6 +32,7 @@ public class TrustedAdvisorClient implements Client {
     public TrustedAdvisorClient(String profile) {
         this(AWSSupportAsyncClientBuilder
                 .standard()
+                    .withCredentials(new ProfileCredentialsProvider(profile))
                     .withRegion(Regions.US_EAST_1.getName())
                 .build());
     }

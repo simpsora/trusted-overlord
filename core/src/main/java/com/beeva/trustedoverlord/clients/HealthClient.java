@@ -27,6 +27,7 @@ public class HealthClient implements Client {
     public HealthClient(String profile) {
         this(AWSHealthAsyncClientBuilder
                 .standard()
+                    .withCredentials(new ProfileCredentialsProvider(profile))
                     .withRegion(Regions.US_EAST_1.getName())
                 .build());
     }
