@@ -1,5 +1,6 @@
 package com.beeva.trustedoverlord.clients;
 
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.health.AWSHealthAsync;
